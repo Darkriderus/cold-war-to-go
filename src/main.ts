@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 
-import HelloWorldScene from './HelloWorldScene'
+import BattlemapScene from './scenes/BattlemapScene'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
@@ -19,7 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
 			},
 		},
 	},
-	scene: [HelloWorldScene],
+	scene: [BattlemapScene],
 }
 
 export default new Phaser.Game(config)
