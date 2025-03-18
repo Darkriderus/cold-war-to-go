@@ -5,7 +5,8 @@ import unitList from "../../public/dummy/dummy_oob.json"
 const DBG_GAP_BETWEEN_UNITS = GRID_SIZE
 
 class BattlemapScene extends Phaser.Scene {
-    private graphics: Phaser.GameObjects.Graphics | undefined;
+    private movementRangeGraphics: Phaser.GameObjects.Graphics | undefined;
+    private dragLineGraphics: Phaser.GameObjects.Graphics | undefined;
 
     public player1Units: Unit[] = []
 
@@ -19,23 +20,27 @@ class BattlemapScene extends Phaser.Scene {
         })
     }
 
-    clearAllLines() {
-        this.graphics?.clear();
+    clearDragLine() {
+        if (!this.dragLineGraphics) this.dragLineGraphics = this.add.graphics();
+        this.dragLineGraphics?.clear();
+    }
+    drawDragLine(unit: Unit) {
+        if (!this.dragLineGraphics) this.dragLineGraphics = this.add.graphics();
+        this.dragLineGraphics?.clear();
+        this.dragLineGraphics?.setDepth(LAYERS.MOVEMENT_LINES);
+        this.dragLineGraphics?.lineStyle(2, 0xFFFFFFF, 0.4);
+        this.dragLineGraphics?.lineBetween(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.x + (GRID_SIZE / 2), unit.y + (GRID_SIZE / 2));
     }
 
-    drawMovementLine(unit: Unit) {
-        this.graphics?.setDepth(LAYERS.BACKGROUND);
-        this.graphics?.lineStyle(2, 0xFFFFFFF, 0.4);
-        this.graphics?.lineBetween(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.x + (GRID_SIZE / 2), unit.y + (GRID_SIZE / 2));
+    clearMovementRange() {
+        if (!this.movementRangeGraphics) this.movementRangeGraphics = this.add.graphics();
+        this.movementRangeGraphics?.clear();
     }
-
-    drawSpeedCircle(unit: Unit) {
-        this.graphics?.setDepth(LAYERS.LINES);
-        this.graphics?.lineStyle(3, 0xFFFFFF, 0.8);
-        this.graphics?.strokeCircle(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.speed);
-
-        console.log("X", unit.ghost.x, (GRID_SIZE / 2))
-        console.log("Y", unit.ghost.y, (GRID_SIZE / 2))
+    drawMovementRange(unit: Unit) {
+        if (!this.movementRangeGraphics) this.movementRangeGraphics = this.add.graphics();
+        this.movementRangeGraphics?.clear();
+        this.movementRangeGraphics?.lineStyle(3, 0xFFFFFF, 0.8);
+        this.movementRangeGraphics?.strokeCircle(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.speed);
     }
 
     preload() {
@@ -45,8 +50,6 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     create() {
-        this.graphics = this.add.graphics();
-
         this.add.image(SMALL_MAP_PIXELSIZE_WIDTH / 2, SMALL_MAP_PIXELSIZE_HEIGHT / 2, 'bg').setDisplaySize(SMALL_MAP_PIXELSIZE_WIDTH, SMALL_MAP_PIXELSIZE_HEIGHT);
 
         unitList.units.forEach((unitToLoad, i: number) => {
@@ -59,8 +62,8 @@ class BattlemapScene extends Phaser.Scene {
                 this.deselectAll(this.player1Units)
                 unit.select()
 
-                this.clearAllLines()
-                this.drawSpeedCircle(unit)
+                this.drawDragLine(unit)
+                this.drawMovementRange(unit)
             });
             this.player1Units.push(unit)
         })
@@ -70,7 +73,8 @@ class BattlemapScene extends Phaser.Scene {
             this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
                 if (gameObjects.length === 0) {
                     this.deselectAll(this.player1Units)
-                    this.clearAllLines()
+                    this.clearDragLine()
+                    this.clearMovementRange()
                 }
             });
         }
@@ -84,11 +88,9 @@ class BattlemapScene extends Phaser.Scene {
 
             this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Unit, dragX: number, dragY: number) => {
                 sprite.setPosition(dragX, dragY);
-                this.clearAllLines()
-                this.drawMovementLine(sprite)
-                this.drawSpeedCircle(sprite)
+                this.drawDragLine(sprite)
+                this.drawMovementRange(sprite)
             });
-
             this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
                 let distance = Phaser.Math.Distance.Between(sprite.ghost.x, sprite.ghost.y, sprite.x, sprite.y);
 
@@ -96,8 +98,8 @@ class BattlemapScene extends Phaser.Scene {
                     console.log("Too far!", distance, ">", sprite.speed);
                     sprite.setPosition(sprite.ghost.x, sprite.ghost.y);
 
-                    this.clearAllLines()
-                    this.drawSpeedCircle(sprite)
+                    this.clearDragLine()                    
+                    this.drawMovementRange(sprite)
                 }
             });
         }

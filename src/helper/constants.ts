@@ -5,6 +5,7 @@ const SMALL_MAP_PIXELSIZE_HEIGHT = 900
 
 const enum LAYERS {
     BACKGROUND = 0,
+    MOVEMENT_LINES = 5,
     GHOSTS = 10,
     UNITS = 20,
     LINES = 30
