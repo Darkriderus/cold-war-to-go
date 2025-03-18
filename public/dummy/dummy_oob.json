@@ -4,25 +4,25 @@
       "name": "MBT",
       "speed": 150,
       "playerId": 1,
-      "texture": "unit_red"
+      "texture": "unit_blue"
     },
     {
       "name": "IFV",
       "speed": 200,
       "playerId": 1,
-      "texture": "unit_red"
+      "texture": "unit_blue"
     },
     {
       "name": "Infantry",
       "speed": 75,
       "playerId": 1,
-      "texture": "unit_red"
+      "texture": "unit_blue"
     },
     {
       "name": "Artillery",
       "speed": 50,
       "playerId": 1,
-      "texture": "unit_red"
+      "texture": "unit_blue"
     }
   ]
 }

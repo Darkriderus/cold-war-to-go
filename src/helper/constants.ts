@@ -12,14 +12,16 @@ const enum LAYERS {
     UI =  100
 }
 
-export type COORD = {
-    X: number,
-    Y: number
+const enum PLAYERS {
+    BLUE = 0,
+    RED = 1
 }
+
 
 export {
     GRID_SIZE,
     SMALL_MAP_PIXELSIZE_WIDTH,
     SMALL_MAP_PIXELSIZE_HEIGHT,
-    LAYERS
+    LAYERS,
+    PLAYERS
 }

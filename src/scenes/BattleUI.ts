@@ -1,4 +1,5 @@
-import { LAYERS, SMALL_MAP_PIXELSIZE_HEIGHT } from "../helper/constants";
+import { LAYERS, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT } from "../helper/constants";
+import BattlemapScene from "./BattlemapScene";
 
 class BattleUI extends Phaser.Scene {
     constructor() {
@@ -14,6 +15,8 @@ class BattleUI extends Phaser.Scene {
     }
 
     create() {
+        const battlemapScene = this.scene.get('BattleMap') as BattlemapScene;
+
         let panel = this.add.rectangle(0, 0, 80, SMALL_MAP_PIXELSIZE_HEIGHT, 0x000000).setAlpha(0.5).setOrigin(0, 0).setDepth(LAYERS.UI);
 
         let moveButton = this.add.sprite(40, 50, 'move-icon')
@@ -57,10 +60,16 @@ class BattleUI extends Phaser.Scene {
             })
             .on('pointerdown', () => {
                 console.log('Button Clicked!');
+
+                battlemapScene.deselectAll();
+                battlemapScene.combatLogic.acceptOrders()
+
             })
         
     }
 }
+
+
 
 export default BattleUI
 

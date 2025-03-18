@@ -1,6 +1,7 @@
-import { GRID_SIZE, LAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from "../helper/constants"
+import { GRID_SIZE, LAYERS, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from "../helper/constants"
 import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
+import CombatLogic from "../logic/combat-logic"
 
 const DBG_GAP_BETWEEN_UNITS = GRID_SIZE
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
@@ -9,16 +10,19 @@ class BattlemapScene extends Phaser.Scene {
     private movementRangeGraphics: Phaser.GameObjects.Graphics | undefined;
     private dragLineGraphics: Phaser.GameObjects.Graphics | undefined;
 
-    public player1Units: Unit[] = []
+    public combatLogic: CombatLogic;
 
     constructor() {
-        super();
+        super({ key: 'BattleMap', active: true });
+
+        this.combatLogic = new CombatLogic();
+        this.combatLogic.initialize();
     }
 
-    deselectAll(units: Unit[]) {
-        units.forEach(unit => {
+    deselectAll() {
+        this.combatLogic.units[PLAYERS.BLUE].forEach(unit => {
             unit.deselect();
-        })
+        })   
     }
 
     clearDragLine() {
@@ -46,8 +50,8 @@ class BattlemapScene extends Phaser.Scene {
 
     preload() {
         this.load.image('bg', 'public/sprites/Testmap.png');
-        this.load.image('unit_red', 'public/sprites/Unit_Red.png');
-        this.load.image('unit_selected', 'public/sprites/Unit_Green.png');
+        this.load.image('unit_blue', 'public/sprites/Unit_Blue.png');
+        this.load.image('unit_selected', 'public/sprites/Unit_Blue.png');
     }
 
     create() {
@@ -59,21 +63,20 @@ class BattlemapScene extends Phaser.Scene {
 
             const unit = new Unit(this, x, y, unitToLoad.texture, { speed: unitToLoad.speed, playerId: 1, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
             unit.on('pointerdown', () => {
-                // [TODO]: Refactor Loop
-                this.deselectAll(this.player1Units)
+                this.deselectAll()
                 unit.select()
 
                 this.drawDragLine(unit)
                 this.drawMovementRange(unit)
             });
-            this.player1Units.push(unit)
+            this.combatLogic.units[PLAYERS.BLUE].push(unit)
         })
 
         // SELECT LOGIC START
         {
             this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
                 if (gameObjects.length === 0) {
-                    this.deselectAll(this.player1Units)
+                    this.deselectAll()
                     this.clearDragLine()
                     this.clearMovementRange()
                 }
