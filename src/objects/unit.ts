@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GRID_SIZE } from '../helper/constants';
 
 type IUnit = {
     speed: number;
@@ -15,10 +14,6 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.speed = unitInfo.speed;
         this.playerId = unitInfo.playerId;
         scene.add.existing(this);
-    }
-
-    get gridPosition() {
-        return [this.x / GRID_SIZE, this.y / GRID_SIZE];
     }
 
     // Weitere Methoden für die Einheit

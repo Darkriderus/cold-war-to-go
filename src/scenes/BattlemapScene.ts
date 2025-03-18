@@ -27,7 +27,7 @@ class BattlemapScene extends Phaser.Scene {
         for (let i = 0; i < DBG_UNIT_PER_SIDE; i++) {
             const x = DBG_GAP_BETWEEN_UNITS + (i * GRID_SIZE) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = GRID_SIZE
-            const unit = new Unit(this, x, y, 'unit_green', { speed: 5, playerId: 1 }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
+            const unit = new Unit(this, x, y, 'unit_green', { speed: 100, playerId: 1 }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
             unit.setInteractive({ draggable: true });
             this.player1Units.push(unit)
         }
@@ -48,16 +48,12 @@ class BattlemapScene extends Phaser.Scene {
 
 
         this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
-
-            console.log("spriteGrid", sprite.gridPosition);
-
             let distance = Phaser.Math.Distance.Between(this.draggedStartX, this.draggedStartY, sprite.x, sprite.y);
-            let distanceInGrid = Math.floor(distance / GRID_SIZE)
 
             console.log("distance", distance, distance / GRID_SIZE);
 
-            if (distanceInGrid > sprite.speed) {
-                console.log("Zuweit!", distanceInGrid, ">", sprite.speed);
+            if (distance > sprite.speed) {
+                console.log("Zuweit!", distance, ">", sprite.speed);
                 sprite.setPosition(this.draggedStartX, this.draggedStartY);
             }
 
