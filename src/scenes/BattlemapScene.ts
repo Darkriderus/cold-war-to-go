@@ -25,7 +25,7 @@ class BattlemapScene extends Phaser.Scene {
 
     drawMovementLine(unit: Unit) {
         this.graphics?.setDepth(LAYERS.BACKGROUND);
-        this.graphics?.lineStyle(2, 0xFFFFFFF, 1);
+        this.graphics?.lineStyle(2, 0xFFFFFFF, 0.4);
         this.graphics?.lineBetween(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.x + (GRID_SIZE / 2), unit.y + (GRID_SIZE / 2));
     }
 
@@ -39,7 +39,7 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('bg', 'https://labs.phaser.io/assets/skies/deepblue.png');
+        this.load.image('bg', 'public/sprites/Testmap.png');
         this.load.image('unit_red', 'public/sprites/Unit_Red.png');
         this.load.image('unit_selected', 'public/sprites/Unit_Green.png');
     }

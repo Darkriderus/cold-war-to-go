@@ -9,7 +9,8 @@ const config: Phaser.Types.Core.GameConfig = {
 	scale: {
 		autoCenter: Phaser.Scale.CENTER_BOTH,
 		width: SMALL_MAP_PIXELSIZE_WIDTH,
-		height: SMALL_MAP_PIXELSIZE_HEIGHT
+		height: SMALL_MAP_PIXELSIZE_HEIGHT,
+		zoom: 1
 	},
 	physics: {
 		default: 'arcade',
