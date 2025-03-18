@@ -18,7 +18,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
 
     get gridPosition() {
-        return [this.x * GRID_SIZE, this.y * GRID_SIZE];
+        return [this.x / GRID_SIZE, this.y / GRID_SIZE];
     }
 
     // Weitere Methoden für die Einheit
