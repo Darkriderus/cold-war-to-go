@@ -1,15 +1,13 @@
-import { GRID_SIZE, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from "../helper/constants"
+import { GRID_SIZE, LAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from "../helper/constants"
 import Unit from "../objects/unit"
 
 const DBG_UNIT_PER_SIDE = 2
 const DBG_GAP_BETWEEN_UNITS = GRID_SIZE
 
-
 class BattlemapScene extends Phaser.Scene {
-    public player1Units: Unit[] = []
+    private graphics: Phaser.GameObjects.Graphics | undefined;
 
-    public draggedStartX: number = -1
-    public draggedStartY: number = -1
+    public player1Units: Unit[] = []
 
     constructor() {
         super();
@@ -21,6 +19,23 @@ class BattlemapScene extends Phaser.Scene {
         })
     }
 
+    clearAllLines() {
+        this.graphics?.clear();
+    }
+
+    drawMovementLine(unit: Unit) {
+        this.graphics?.lineStyle(2, 0x880055, 0.4);
+        this.graphics?.lineBetween(unit.ghost.x, unit.ghost.y, unit.x, unit.y);
+    }
+
+    drawSpeedCircle(unit: Unit) {
+        this.graphics?.lineStyle(3, 0xffffff, 0.8);
+        this.graphics?.strokeCircle(unit.x + (GRID_SIZE / 2), unit.y + (GRID_SIZE / 2), unit.speed);
+
+        console.log("X", unit.ghost.x, (GRID_SIZE / 2))
+        console.log("Y", unit.ghost.y, (GRID_SIZE / 2))
+    }
+
     preload() {
         this.load.image('bg', 'https://labs.phaser.io/assets/skies/deepblue.png');
         this.load.image('unit_green', 'public/sprites/Unit_Green.png');
@@ -29,18 +44,25 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     create() {
+        this.graphics = this.add.graphics();
+        this.graphics.setDepth(LAYERS.LINES);
+
         this.add.image(SMALL_MAP_PIXELSIZE_WIDTH / 2, SMALL_MAP_PIXELSIZE_HEIGHT / 2, 'bg').setDisplaySize(SMALL_MAP_PIXELSIZE_WIDTH, SMALL_MAP_PIXELSIZE_HEIGHT);
 
+        // [TODO]: Load Unit from Config
         for (let i = 0; i < DBG_UNIT_PER_SIDE; i++) {
             const x = DBG_GAP_BETWEEN_UNITS + (i * GRID_SIZE) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = GRID_SIZE
-            // Load Unit from Config
+
             const unit = new Unit(this, x, y, 'unit_red', { speed: 100, playerId: 1 }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
             unit.setInteractive({ draggable: true });
             unit.on('pointerdown', () => {
-                //Refactor Loop
+                // [TODO]: Refactor Loop
                 this.deselectAll(this.player1Units)
                 unit.select()
+
+                this.clearAllLines()
+                this.drawSpeedCircle(unit)
             });
             this.player1Units.push(unit)
         }
@@ -50,6 +72,7 @@ class BattlemapScene extends Phaser.Scene {
             this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
                 if (gameObjects.length === 0) {
                     this.deselectAll(this.player1Units)
+                    this.clearAllLines()
                 }
             });
         }
@@ -58,30 +81,20 @@ class BattlemapScene extends Phaser.Scene {
 
         // DRAG LOGIC START - To be modularized
         {
-            this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
-                this.draggedStartX = sprite.x;
-                this.draggedStartY = sprite.y;
-
-                console.log("Start dragging - X: " + this.draggedStartX + " Y: " + this.draggedStartY);
+            this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _sprite: Unit) => {
             });
 
             this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite, dragX: number, dragY: number) => {
                 sprite.setPosition(dragX, dragY);
             });
 
-
             this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
-                let distance = Phaser.Math.Distance.Between(this.draggedStartX, this.draggedStartY, sprite.x, sprite.y);
-
-                console.log("distance", distance, distance / GRID_SIZE);
+                let distance = Phaser.Math.Distance.Between(sprite.ghost.x, sprite.ghost.y, sprite.x, sprite.y);
 
                 if (distance > sprite.speed) {
-                    console.log("Zuweit!", distance, ">", sprite.speed);
-                    sprite.setPosition(this.draggedStartX, this.draggedStartY);
+                    console.log("Too far!", distance, ">", sprite.speed);
+                    sprite.setPosition(sprite.ghost.x, sprite.ghost.y);
                 }
-
-                this.draggedStartX = -1;
-                this.draggedStartY = -1;
             });
         }
         // DRAG LOGIC END
