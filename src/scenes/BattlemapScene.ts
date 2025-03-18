@@ -15,6 +15,12 @@ class BattlemapScene extends Phaser.Scene {
         super();
     }
 
+    deselectAll(units: Unit[]) {
+        units.forEach(unit => {
+            unit.deselect();
+        })
+    }
+
     preload() {
         this.load.image('bg', 'https://labs.phaser.io/assets/skies/deepblue.png');
         this.load.image('unit_green', 'public/sprites/Unit_Green.png');
@@ -28,17 +34,27 @@ class BattlemapScene extends Phaser.Scene {
         for (let i = 0; i < DBG_UNIT_PER_SIDE; i++) {
             const x = DBG_GAP_BETWEEN_UNITS + (i * GRID_SIZE) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = GRID_SIZE
+            // Load Unit from Config
             const unit = new Unit(this, x, y, 'unit_red', { speed: 100, playerId: 1 }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
             unit.setInteractive({ draggable: true });
             unit.on('pointerdown', () => {
                 //Refactor Loop
-                this.player1Units.forEach(unit => {
-                    unit.deselect();
-                })
+                this.deselectAll(this.player1Units)
                 unit.select()
             });
             this.player1Units.push(unit)
         }
+
+        // SELECT LOGIC START
+        {
+            this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
+                if (gameObjects.length === 0) {
+                    this.deselectAll(this.player1Units)
+                }
+            });
+        }
+        // SELECT LOGIC END
+
 
         // DRAG LOGIC START - To be modularized
         {
@@ -50,9 +66,6 @@ class BattlemapScene extends Phaser.Scene {
             });
 
             this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite, dragX: number, dragY: number) => {
-                dragX = Phaser.Math.Snap.To(dragX, GRID_SIZE);
-                dragY = Phaser.Math.Snap.To(dragY, GRID_SIZE);
-
                 sprite.setPosition(dragX, dragY);
             });
 
