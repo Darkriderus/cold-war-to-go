@@ -3,6 +3,7 @@ import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
 
 const DBG_GAP_BETWEEN_UNITS = GRID_SIZE
+const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
 
 class BattlemapScene extends Phaser.Scene {
     private movementRangeGraphics: Phaser.GameObjects.Graphics | undefined;
@@ -53,7 +54,7 @@ class BattlemapScene extends Phaser.Scene {
         this.add.image(SMALL_MAP_PIXELSIZE_WIDTH / 2, SMALL_MAP_PIXELSIZE_HEIGHT / 2, 'bg').setDisplaySize(SMALL_MAP_PIXELSIZE_WIDTH, SMALL_MAP_PIXELSIZE_HEIGHT);
 
         unitList.units.forEach((unitToLoad, i: number) => {
-            const x = DBG_GAP_BETWEEN_UNITS + (i * GRID_SIZE) + (i * DBG_GAP_BETWEEN_UNITS)
+            const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * GRID_SIZE) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = GRID_SIZE
 
             const unit = new Unit(this, x, y, unitToLoad.texture, { speed: unitToLoad.speed, playerId: 1, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);

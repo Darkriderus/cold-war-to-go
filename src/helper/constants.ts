@@ -8,7 +8,8 @@ const enum LAYERS {
     MOVEMENT_LINES = 5,
     GHOSTS = 10,
     UNITS = 20,
-    LINES = 30
+    LINES = 30,
+    UI =  100
 }
 
 export type COORD = {

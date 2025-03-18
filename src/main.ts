@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 
 import BattlemapScene from './scenes/BattlemapScene'
 import { SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from './helper/constants'
+import BattleUI from './scenes/BattleUI'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
@@ -21,7 +22,7 @@ const config: Phaser.Types.Core.GameConfig = {
 			},
 		},
 	},
-	scene: [BattlemapScene],
+	scene: [BattlemapScene, BattleUI],
 }
 
 export default new Phaser.Game(config)
