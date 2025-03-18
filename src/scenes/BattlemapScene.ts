@@ -33,8 +33,8 @@ class BattlemapScene extends Phaser.Scene {
         }
 
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
-            this.draggedStartX = sprite.gridPosition[0];
-            this.draggedStartY = sprite.gridPosition[1];
+            this.draggedStartX = sprite.x;
+            this.draggedStartY = sprite.y;
 
             console.log("Start dragging - X: " + this.draggedStartX + " Y: " + this.draggedStartY);
         });
@@ -51,12 +51,18 @@ class BattlemapScene extends Phaser.Scene {
 
             console.log("spriteGrid", sprite.gridPosition);
 
-            // SPeed-Check
+            let distance = Phaser.Math.Distance.Between(this.draggedStartX, this.draggedStartY, sprite.x, sprite.y);
+            let distanceInGrid = Math.floor(distance / GRID_SIZE)
 
+            console.log("distance", distance, distance / GRID_SIZE);
+
+            if (distanceInGrid > sprite.speed) {
+                console.log("Zuweit!", distanceInGrid, ">", sprite.speed);
+                sprite.setPosition(this.draggedStartX, this.draggedStartY);
+            }
 
             this.draggedStartX = -1;
             this.draggedStartY = -1;
-            console.log("Stop dragging - X: " + this.draggedStartX + " Y: " + this.draggedStartY);
         });
     }
 }
