@@ -47,7 +47,8 @@ class BattlemapScene extends Phaser.Scene {
                 moveModifier: 0, 
                 blocksLOS: false,
                 showTerrain: true,
-                type: TerrainType.WATER
+                type: TerrainType.WATER,
+                hitModifier: 1,
             },
             {
                 scene: this,
@@ -70,7 +71,8 @@ class BattlemapScene extends Phaser.Scene {
                 moveModifier: 1.5, 
                 blocksLOS: false,
                 showTerrain: true,
-                type: TerrainType.ROAD
+                type: TerrainType.ROAD,
+                hitModifier: 1,
             },
             {
                 scene: this,
@@ -84,6 +86,26 @@ class BattlemapScene extends Phaser.Scene {
                 blocksLOS: false,
                 type: TerrainType.CITY,
                 showTerrain: true,
+                hitModifier: 0.5,
+            },
+            {
+                scene: this,
+                points: [
+                    221,620,
+                    265,592,
+                    273,569,
+                    237,558,
+                    218,546,
+                    202,554,
+                    213,581,
+                    205,606,
+                    221,619,
+                ],
+                moveModifier: 0.3,
+                blocksLOS: true,
+                showTerrain: true,
+                type: TerrainType.WOODS,
+                hitModifier: 0.8,
             }
         ],
     }
@@ -126,6 +148,8 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     deployUnits(playerTeam: PLAYERS) {
+        const battleUiScene = this.scene.get('BattleUI') as BattleUI;
+
         unitList.units.filter(unit => unit.playerId === playerTeam).forEach((unitToLoad, idx) => {
             const leftEdge = playerTeam === PLAYERS.BLUE ? this.mapConfig.blueDeploy.x1 + DBG_OFFSET : this.mapConfig.redDeploy.x1 + DBG_OFFSET;
             const topEdge = playerTeam === PLAYERS.BLUE ? this.mapConfig.blueDeploy.y1 + DBG_OFFSET : this.mapConfig.redDeploy.y1 + DBG_OFFSET
@@ -134,6 +158,7 @@ class BattlemapScene extends Phaser.Scene {
             unit.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
+                battleUiScene.showUnitInfo(unit);
 
                 this.clearAllRangeCircles()
                 unit.drawRangeCircle(unit);
@@ -141,6 +166,7 @@ class BattlemapScene extends Phaser.Scene {
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
+                battleUiScene.showUnitInfo(unit);
 
                 this.clearAllRangeCircles()
                 unit.drawRangeCircle(unit);
@@ -179,9 +205,10 @@ class BattlemapScene extends Phaser.Scene {
         this.deployUnits(PLAYERS.BLUE);
         this.deployUnits(PLAYERS.RED);
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
-            console.log("Map Clicked", pointer.x, pointer.y);
+            console.log(pointer.x + "," + pointer.y + ",");
             if (gameObjects.length === 0) {
                 this.deselectAll()
+                battleUiScene.showUnitInfo();
                 this.combatLogic.allUnits.forEach(unit => {
                     unit.clearRangeCircles();
                 })
