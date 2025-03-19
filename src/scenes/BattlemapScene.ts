@@ -62,6 +62,8 @@ class BattlemapScene extends Phaser.Scene {
         this.load.image('bg', 'public/sprites/Testmap.png');
         this.load.image('tank_red', 'public/sprites/units/tank_red.svg');
         this.load.image('tank_blue', 'public/sprites/units/tank_blue.svg');
+        this.load.image('tank_grey', 'public/sprites/units/tank_grey.svg');
+
         this.load.image('apc_red', 'public/sprites/units/apc_red.svg');
         this.load.image('apc_blue', 'public/sprites/units/apc_blue.svg');
     }

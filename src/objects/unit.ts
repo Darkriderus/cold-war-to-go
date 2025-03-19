@@ -28,9 +28,12 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     public ghost: Phaser.GameObjects.Sprite;
     public healthLabel: Phaser.GameObjects.Text;
 
+    public hitGraphics: Phaser.GameObjects.Graphics;
+
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
         const colorSuffix = unitInfo.playerId === PLAYERS.BLUE ? '_blue' : '_red';
         super(scene, x, y, texture + colorSuffix);
+        this.hitGraphics = this.scene.add.graphics();
 
         this.movementPerTick = unitInfo.movementPerTick;
         this.playerId = unitInfo.playerId;
@@ -60,9 +63,15 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setBackgroundColor("grey").setOrigin(0, 0);
     }
 
+    decideTargetToShoot(targetsInRange: {unit:Unit, distance: number}[]) {
+        // [TODO] Add logic
+        if (targetsInRange.length === 0) return null
+        return targetsInRange.sort((a, b) => a.distance - b.distance)[0]
+    }
+
     shoot(target: Unit) {
         // [TODO] ROLLS TO HIT
-        this.shootEffect()
+        this.shootEffect(target)
         target.damage(1);
     }
 
@@ -70,7 +79,10 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.health -= damage;
         
         if(this.health <= 0) {
+            console.log(`!!!!!!!${this.name} died!`)
             // this.destroy();
+            this.setTexture("tank_grey")
+            this.ghost.setTexture("tank_grey").setVisible(false)
             this.health = 0
         }
         this.hitEffect()
@@ -87,14 +99,30 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         }
     }
 
-    shootEffect() {
+    shootEffect(target: Unit) {
         let flashTimes = 3;
         let delay = 100;
 
-        for (let i = 0; i < flashTimes; i++) {
-            this.scene.time.delayedCall(i * delay * 2, () => this.setVisible(false));
-            this.scene.time.delayedCall(i * delay * 2 + delay, () => this.setVisible(true));
-        }
+        new Promise<void>((resolve) => {
+            let completedFlashes = 0;
+            for (let i = 0; i < flashTimes; i++) {
+                this.scene.time.delayedCall(i * delay * 2 , () => {
+                    this.hitGraphics.lineStyle(4, this.playerId === PLAYERS.BLUE ? 0x0000FF : 0xFF0000, 1);
+                    this.hitGraphics.setDepth(LAYERS.MOVEMENT_LINES);
+                    this.hitGraphics.lineBetween(this.x + (TOKEN_SIZE / 2), this.y + (TOKEN_SIZE / 2), target.x + (TOKEN_SIZE / 2), target.y + (TOKEN_SIZE / 2));
+                });
+    
+                this.scene.time.delayedCall(i * delay * 2 + delay, () => {
+                    this.hitGraphics.clear();
+                    completedFlashes++;
+    
+                    // Resolve when the last flash is completed
+                    if (completedFlashes === flashTimes) {
+                        resolve();
+                    }
+                });
+            }
+        })
     }
 
     move(x: number, y: number) {
