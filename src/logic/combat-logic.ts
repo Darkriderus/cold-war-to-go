@@ -60,13 +60,13 @@ export default class CombatLogic {
     handleTick(): void {    
         this.units[PLAYERS.BLUE].forEach(unit => {
             if (unit.currentOrder === null) return
-            const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, unit.currentOrder?.targetX!, unit.currentOrder?.targetY!);
+            const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
             if (distanceLeft < unit.movementPerTick) {
-                unit.x = unit.currentOrder?.targetX!;
-                unit.y = unit.currentOrder?.targetY!;
+                unit.x = unit.currentOrder?.movementToX!;
+                unit.y = unit.currentOrder?.movementToY!;
             }
             else {
-                const angle = Phaser.Math.Angle.Between(unit.x, unit.y, unit.currentOrder?.targetX!, unit.currentOrder?.targetY!);
+                const angle = Phaser.Math.Angle.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
                 const newX = unit.x + Math.cos(angle) * unit.movementPerTick;
                 const newY = unit.y + Math.sin(angle) * unit.movementPerTick;
 
@@ -74,15 +74,6 @@ export default class CombatLogic {
                 unit.y = newY
             }
         })
-        // const deltaX = dbgUnit.currentOrder?.targetX! - dbgUnit.x
-        // const deltaY = dbgUnit.currentOrder?.targetY! - dbgUnit.y
-
-        // console.log("-- MOVEMENT --")
-        // console.log("POS OLD ", dbgUnit.x, dbgUnit.y)
-        // console.log("POS NEW ", dbgUnit.currentOrder?.targetX, dbgUnit.currentOrder?.targetY)
-
-        // dbgUnit.x += deltaX
-        // dbgUnit.y += deltaY
     }
 
 

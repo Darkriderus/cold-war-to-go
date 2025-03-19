@@ -4,10 +4,9 @@ import unitList from "../../public/dummy/dummy_oob.json"
 import CombatLogic from "../logic/combat-logic"
 
 // TODO/IDEAS
-// Tick-System
 // FFT-Values with 10x Health
 
-const DBG_GAP_BETWEEN_UNITS = GRID_SIZE
+const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
 
 class BattlemapScene extends Phaser.Scene {
@@ -54,18 +53,19 @@ class BattlemapScene extends Phaser.Scene {
 
     preload() {
         this.load.image('bg', 'public/sprites/Testmap.png');
-        this.load.image('unit_blue', 'public/sprites/Unit_Blue.png');
-        this.load.image('unit_ghost', 'public/sprites/Unit_Green.png');
+        this.load.image('tank_red', 'public/sprites/units/tank_red.svg');
+        this.load.image('tank_blue', 'public/sprites/units/tank_blue.svg');
+        this.load.image('apc_red', 'public/sprites/units/apc_red.svg');
+        this.load.image('apc_blue', 'public/sprites/units/apc_blue.svg');
     }
 
     create() {
         this.add.image(SMALL_MAP_PIXELSIZE_WIDTH / 2, SMALL_MAP_PIXELSIZE_HEIGHT / 2, 'bg').setDisplaySize(SMALL_MAP_PIXELSIZE_WIDTH, SMALL_MAP_PIXELSIZE_HEIGHT);
 
         unitList.units.forEach((unitToLoad, i: number) => {
-            const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * GRID_SIZE) + (i * DBG_GAP_BETWEEN_UNITS)
-            const y = GRID_SIZE
-
-            const unit = new Unit(this, x, y, unitToLoad.texture, { movementPerTick: unitToLoad.movementPerTick, playerId: 1, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
+            const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * DBG_GAP_BETWEEN_UNITS) + (i * DBG_GAP_BETWEEN_UNITS)
+            const y = unitToLoad.playerId === PLAYERS.BLUE ? DBG_GAP_BETWEEN_UNITS : SMALL_MAP_PIXELSIZE_HEIGHT - DBG_GAP_BETWEEN_UNITS
+            const unit = new Unit(this, x, y, unitToLoad.texture, { movementPerTick: unitToLoad.movementPerTick, playerId: unitToLoad.playerId, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
@@ -74,18 +74,13 @@ class BattlemapScene extends Phaser.Scene {
             });
             this.combatLogic.units[PLAYERS.BLUE].push(unit)
         })
-
-        // SELECT LOGIC START
-        {
-            this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
-                if (gameObjects.length === 0) {
-                    this.deselectAll()
-                    this.clearDragLine()
-                    this.clearMovementRange()
-                } 
-            });
-        }
-        // SELECT LOGIC END
+        this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
+            if (gameObjects.length === 0) {
+                this.deselectAll()
+                this.clearDragLine()
+                this.clearMovementRange()
+            } 
+        });
 
 
         // DRAG LOGIC START - To be modularized
@@ -103,8 +98,8 @@ class BattlemapScene extends Phaser.Scene {
                 const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
 
                 if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
-                connectedUnit.currentOrder.targetX = ghost.x;
-                connectedUnit.currentOrder.targetY = ghost.y;
+                connectedUnit.currentOrder.movementToX = ghost.x;
+                connectedUnit.currentOrder.movementToY = ghost.y;
             });    
         }
         // DRAG LOGIC END

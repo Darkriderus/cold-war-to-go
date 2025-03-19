@@ -2,27 +2,29 @@
   "units": [
     {
       "name": "MBT",
-      "movementPerTick": 30,
-      "playerId": 1,
-      "texture": "unit_blue"
+      "movementPerTick": 10,
+      "playerId": 0,
+      "texture": "tank"
     },
     {
-      "name": "IFV",
-      "movementPerTick": 40,
+      "name": "APC",
+      "movementPerTick": 10,
+      "playerId": 0,
+      "texture": "apc"
+    },
+
+
+    {
+      "name": "MBT",
+      "movementPerTick": 10,
       "playerId": 1,
-      "texture": "unit_blue"
+      "texture": "tank"
     },
     {
-      "name": "Infantry",
-      "movementPerTick": 20,
+      "name": "APC",
+      "movementPerTick": 10,
       "playerId": 1,
-      "texture": "unit_blue"
-    },
-    {
-      "name": "Artillery",
-      "movementPerTick": 5,
-      "playerId": 1,
-      "texture": "unit_blue"
+      "texture": "apc"
     }
   ]
 }
