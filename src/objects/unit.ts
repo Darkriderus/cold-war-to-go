@@ -3,11 +3,40 @@ import { LAYERS, MoveType, PLAYER_COLOR, PLAYERS, TOKEN_SIZE } from '../helper/c
 import BattlemapScene from '../scenes/BattlemapScene';
 
 type IUnit = {
-    movementPerTick: number;
-    playerId: number;
-    name: string;
-    health: number;
-    range: number;
+    points: number
+    movement: number
+    movementType: MovementType
+    armor: Armor
+    gun?: Gun
+    missile?: Missile
+
+    movementPerTick: number
+    playerId: number
+    name: string
+    health: number
+    range: number
+}
+
+type Gun = {
+    penetrationH: number
+    penetrationHe: number
+    penetrationAA: number
+    rateOfFire: number
+    range: number
+    antiInfantry: number 
+}
+
+type Missile = {
+    penetrationH: number
+    penetrationHe: number
+    penetrationAA: number
+    rateOfFire: number
+}
+
+type Armor = {
+    front: number
+    side: number
+    hModifier: number
 }
 
 type Order = {
@@ -17,11 +46,31 @@ type Order = {
     targetUnit?: Unit;
 }
 
+enum MovementType {
+    TRACKED,
+    WHEELED,
+    HALFTRACKED,
+    TOWED,
+    HELICOPTER,
+    AIRMOBILE,
+    LEGS
+}
+
 export default class Unit extends Phaser.GameObjects.Sprite {
-    public movementPerTick: number;
-    public playerId: number;
+    public points: number
+    public movement: number
+    public movementType: MovementType
+
+    public armor: Armor;
+    public gun?: Gun;
+
+
     public maxHealth: number;
     public health: number;
+    public playerId: number;
+
+    // LEGACY
+    public movementPerTick: number;
     public range: number;
     
     public selected: boolean = false;
@@ -40,7 +89,11 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.moveGraphics = this.scene.add.graphics();
         this.rangeGraphics = this.scene.add.graphics();
 
-
+        this.points = unitInfo.points;
+        this.movement = unitInfo.movement;
+        this.movementType = unitInfo.movementType;
+        this.armor = unitInfo.armor;
+        this.gun = unitInfo.gun;
         this.movementPerTick = unitInfo.movementPerTick;
         this.playerId = unitInfo.playerId;
         this.health = unitInfo.health;
@@ -132,7 +185,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         // [TODO] Hit Logic
         let chanceToHit = 0.8;
         if (target.terrain){
-            chanceToHit *= target.terrain.moveModifier
+            chanceToHit *= target.terrain.hitModifier
         }
 
         this.shootEffect(target)

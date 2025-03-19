@@ -7,7 +7,8 @@ type ITerrain = {
     blocksLOS: boolean,
     points: number[],
     showTerrain: boolean,
-    type: TerrainType
+    type: TerrainType,
+    hitModifier: number
 }
 
 export class Terrain extends Phaser.Geom.Polygon {
@@ -17,11 +18,13 @@ export class Terrain extends Phaser.Geom.Polygon {
     blocksLOS: boolean
     showTerrain: boolean
     type: TerrainType
+    hitModifier: number
 
     constructor(terrainData: ITerrain) {
         super(terrainData.points) 
 
         this.moveModifier = terrainData.moveModifier
+        this.hitModifier = terrainData.hitModifier
         this.blocksLOS = terrainData.blocksLOS
         this.showTerrain = terrainData.showTerrain
         this.type = terrainData.type
