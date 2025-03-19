@@ -2,25 +2,25 @@
   "units": [
     {
       "name": "MBT",
-      "speed": 150,
+      "movementPerTick": 30,
       "playerId": 1,
       "texture": "unit_blue"
     },
     {
       "name": "IFV",
-      "speed": 200,
+      "movementPerTick": 40,
       "playerId": 1,
       "texture": "unit_blue"
     },
     {
       "name": "Infantry",
-      "speed": 75,
+      "movementPerTick": 20,
       "playerId": 1,
       "texture": "unit_blue"
     },
     {
       "name": "Artillery",
-      "speed": 50,
+      "movementPerTick": 5,
       "playerId": 1,
       "texture": "unit_blue"
     }
