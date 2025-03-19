@@ -98,15 +98,18 @@ export default class CombatLogic {
                 }
         
                 // SHOOT
-        
-                enemyUnits.forEach(enemyUnit => {
+                const targetsInRange = enemyUnits.map(enemyUnit => {
                     const distance = Phaser.Math.Distance.Between(unit.x, unit.y, enemyUnit.x, enemyUnit.y);
-                    if (distance <= unit.range) {
-                        console.log(`   >!shoot ${enemyUnit.name}`);
-                        unit.shoot(enemyUnit);
-                    }
-                })
-    
+                    return { unit: enemyUnit, distance }
+                }).filter(target => target.distance <= unit.range);
+
+                const targetToShoot = unit.decideTargetToShoot(targetsInRange);
+
+                if (targetToShoot) {
+                    unit.shoot(targetToShoot.unit);
+                    console.log("   >shoot " + targetToShoot.unit.name);
+                }
+                unit.hitGraphics.clear();
             })
         })
         
