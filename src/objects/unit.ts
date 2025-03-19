@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GRID_SIZE, LAYERS } from '../helper/constants';
 
 type IUnit = {
-    speed: number;
+    movementPerTick: number;
     playerId: number;
     name: string;
 }
@@ -14,7 +14,7 @@ type Order = {
 }
 
 export default class Unit extends Phaser.GameObjects.Sprite {
-    public speed: number;
+    public movementPerTick: number;
     public playerId: number;
     public selected: boolean = false;
     public baseTexture: string;
@@ -27,7 +27,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
         super(scene, x, y, texture);
-        this.speed = unitInfo.speed;
+        this.movementPerTick = unitInfo.movementPerTick;
         this.playerId = unitInfo.playerId;
         this.baseTexture = texture;
         this.initialX = x;

@@ -20,7 +20,7 @@ class BattlemapScene extends Phaser.Scene {
         super({ key: 'BattleMap', active: true });
 
         this.combatLogic = new CombatLogic();
-        this.combatLogic.initialize();
+        this.combatLogic.initialize(this);
     }
 
     deselectAll() {
@@ -49,7 +49,7 @@ class BattlemapScene extends Phaser.Scene {
         if (!this.movementRangeGraphics) this.movementRangeGraphics = this.add.graphics();
         this.movementRangeGraphics?.clear();
         this.movementRangeGraphics?.lineStyle(3, 0xFFFFFF, 0.8);
-        this.movementRangeGraphics?.strokeCircle(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.speed);
+        this.movementRangeGraphics?.strokeCircle(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.movementPerTick);
     }
 
     preload() {
@@ -65,7 +65,7 @@ class BattlemapScene extends Phaser.Scene {
             const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * GRID_SIZE) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = GRID_SIZE
 
-            const unit = new Unit(this, x, y, unitToLoad.texture, { speed: unitToLoad.speed, playerId: 1, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
+            const unit = new Unit(this, x, y, unitToLoad.texture, { movementPerTick: unitToLoad.movementPerTick, playerId: 1, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()

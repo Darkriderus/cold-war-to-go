@@ -15,7 +15,7 @@ class BattleUI extends Phaser.Scene {
     create() {
         const battlemapScene = this.scene.get('BattleMap') as BattlemapScene;
 
-        let panel = this.add.rectangle(0, 0, 80, SMALL_MAP_PIXELSIZE_HEIGHT, 0x000000).setAlpha(0.5).setOrigin(0, 0).setDepth(LAYERS.UI);
+        this.add.rectangle(0, 0, 80, SMALL_MAP_PIXELSIZE_HEIGHT, 0x000000).setAlpha(0.5).setOrigin(0, 0).setDepth(LAYERS.UI);
 
         let moveButton = this.add.sprite(40, 50, 'move-icon')
             .setDepth(LAYERS.UI)
@@ -60,7 +60,7 @@ class BattleUI extends Phaser.Scene {
                 battlemapScene.deselectAll();
                 battlemapScene.clearDragLine();
                 battlemapScene.clearMovementRange();
-                battlemapScene.combatLogic.acceptOrders(battlemapScene)
+                battlemapScene.combatLogic.acceptOrders()
             })
         
     }
