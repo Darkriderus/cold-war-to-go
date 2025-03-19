@@ -83,21 +83,23 @@ export default class CombatLogic {
                     const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
                     if (distanceLeft === 0) {
                         console.log("   >stop.");
-
                         return
                     }
 
-                    if (distanceLeft < unit.movementPerTick) {
+                    const currentlyOccupiedTerrain = this.battleMapScene!.terrains.find(terrain => terrain.intersects(unit));
+                    const terrainModifiedDistance = unit.movementPerTick * (currentlyOccupiedTerrain?.moveModifier || 1);
+
+                    if (distanceLeft < terrainModifiedDistance) {
                         unit.move(unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!)
-                        console.log("   >move+stop");
+                        console.log("   >move (" + terrainModifiedDistance + ")+stop");
                     }
                     else {
                         const angle = Phaser.Math.Angle.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
-                        const newX = unit.x + Math.cos(angle) * unit.movementPerTick;
-                        const newY = unit.y + Math.sin(angle) * unit.movementPerTick;
+                        const newX = unit.x + Math.cos(angle) * terrainModifiedDistance;
+                        const newY = unit.y + Math.sin(angle) * terrainModifiedDistance;
         
                         unit.move(newX, newY)
-                        console.log("   >move");
+                        console.log("   >move (" + terrainModifiedDistance + ")");
                     }
                 }
         
