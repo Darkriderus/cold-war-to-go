@@ -1,10 +1,21 @@
-import { LAYERS, SMALL_MAP_PIXELSIZE_HEIGHT } from "../helper/constants";
+import { LAYERS, MoveType, SMALL_MAP_PIXELSIZE_HEIGHT } from "../helper/constants";
 import BattlemapScene from "./BattlemapScene";
 
 class BattleUI extends Phaser.Scene {
+    readonly SELECTED_TINT = 0x00DD00;
+
+    moveButton: Phaser.GameObjects.Sprite | undefined;
+    shootButton: Phaser.GameObjects.Sprite | undefined;
+
+    moveButtonSelected: boolean = true;
+    shootButtonSelected: boolean = false;
+
+    public selectedOrderType: MoveType = MoveType.MOVE
+
     constructor() {
         super({ key: 'BattleUI', active: true });
     }
+
 
     preload() {
         this.load.image('move-icon', 'public/sprites/icons/move.svg');       
@@ -17,41 +28,53 @@ class BattleUI extends Phaser.Scene {
 
         this.add.rectangle(0, 0, 80, SMALL_MAP_PIXELSIZE_HEIGHT, 0x000000).setAlpha(0.5).setOrigin(0, 0).setDepth(LAYERS.UI);
 
-        let moveButton = this.add.sprite(40, 50, 'move-icon')
+        this.moveButton = this.add.sprite(40, 50, 'move-icon')
             .setDepth(LAYERS.UI)
             .setDisplaySize(50, 50)
             .setInteractive()
             .on('pointerover', () => {
-                moveButton.setTint(0xAAAAAA);
             })
             .on('pointerout', () => {
-                moveButton.clearTint();
             })
             .on('pointerdown', () => {
-                console.log('Button Clicked!');
-            })
+                this.moveButtonSelected = true
+                this.shootButtonSelected = false
 
-            
-        let shootButton = this.add.sprite(40, 150, 'shoot-icon')
+                this.selectedOrderType = MoveType.MOVE
+                
+                this.moveButton?.setTint(this.SELECTED_TINT);
+                this.shootButton?.clearTint();
+            })
+        if (this.moveButtonSelected) {
+            this.moveButton?.setTint(this.SELECTED_TINT);
+        }
+
+        this.shootButton = this.add.sprite(40, 150, 'shoot-icon')
             .setDepth(LAYERS.UI)
             .setDisplaySize(50, 50)
             .setInteractive()
             .on('pointerover', () => {
-                shootButton.setTint(0xAAAAAA);
             })
             .on('pointerout', () => {
-                shootButton.clearTint();
             })
             .on('pointerdown', () => {
-                console.log('Button Clicked!');
+                this.moveButtonSelected = false
+                this.shootButtonSelected = true
+
+                this.selectedOrderType = MoveType.ATTACK
+
+                this.shootButton?.setTint(this.SELECTED_TINT);
+                this.moveButton?.clearTint();
             })
+            if (this.shootButtonSelected) {
+                this.shootButton.setTint(this.SELECTED_TINT);
+            }
 
         let nextTurnButton = this.add.sprite(40, SMALL_MAP_PIXELSIZE_HEIGHT - 50, 'next-turn-icon')
             .setDepth(LAYERS.UI)
             .setDisplaySize(50, 50)
             .setInteractive()
             .on('pointerover', () => {
-                nextTurnButton.setTint(0xAAAAAA);
             })
             .on('pointerout', () => {
                 nextTurnButton.clearTint();
