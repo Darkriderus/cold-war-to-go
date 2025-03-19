@@ -71,6 +71,7 @@ export default class CombatLogic {
             const enemyAliveUnits = this.units[playerId === PLAYERS.BLUE ? PLAYERS.RED : PLAYERS.BLUE].filter(unit => unit.health > 0);
 
             playerUnits.forEach(unit => {
+                console.log("-------------");
                 console.log(`[${unit.playerId === PLAYERS.BLUE ? 'Blue' : 'Red'}] unit ${unit.name}..`);
                 if (unit.health <= 0) {
                     console.log("   >dead");
@@ -83,7 +84,6 @@ export default class CombatLogic {
                     const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
                     if (distanceLeft === 0) {
                         console.log("   >stop.");
-                        return
                     }
 
                     const currentlyOccupiedTerrain = this.battleMapScene!.terrains.find(terrain => terrain.intersects(unit));
@@ -108,6 +108,7 @@ export default class CombatLogic {
                     const distance = Phaser.Math.Distance.Between(unit.center.x, unit.center.y, enemyUnit.center.x, enemyUnit.center.y);
                     return { unit: enemyUnit, distance }
                 }).filter(target => target.distance <= unit.range);
+                console.log("   >targets in range: " + targetsInRange.length);
 
                 const targetToShoot = unit.decideTargetToShoot(targetsInRange);
 

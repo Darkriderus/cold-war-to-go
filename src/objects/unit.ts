@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { LAYERS, MoveType, PLAYER_COLOR, PLAYERS, TOKEN_SIZE } from '../helper/constants';
+import BattlemapScene from '../scenes/BattlemapScene';
 
 type IUnit = {
     movementPerTick: number;
@@ -30,12 +31,15 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     public hitGraphics: Phaser.GameObjects.Graphics;
     public moveGraphics: Phaser.GameObjects.Graphics;
+    public rangeGraphics: Phaser.GameObjects.Graphics;
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
         const colorSuffix = unitInfo.playerId === PLAYERS.BLUE ? '_blue' : '_red';
         super(scene, x, y, texture + colorSuffix);
         this.hitGraphics = this.scene.add.graphics();
         this.moveGraphics = this.scene.add.graphics();
+        this.rangeGraphics = this.scene.add.graphics();
+
 
         this.movementPerTick = unitInfo.movementPerTick;
         this.playerId = unitInfo.playerId;
@@ -85,12 +89,30 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         return this.health > 0;
     }
 
-    redrawMoveLine() {  
+    get terrain() {
+        const battlemapScene = this.scene.scene.get('BattleMap') as BattlemapScene
+        return battlemapScene.terrains.find(terrain => terrain.intersects(this));
+
+    }
+
+    clearMoveLine() {
         this.moveGraphics.clear();
+    }
+    redrawMoveLine() {  
+        this.clearMoveLine()
         if (!this.alive) return
         this.moveGraphics.setDepth(LAYERS.MOVEMENT_LINES);
         this.moveGraphics.lineStyle(2, this.playerColor, 0.6);
         this.moveGraphics.lineBetween(this.ghostCenter.x, this.ghostCenter.y, this.center.x, this.center.y);
+    }
+
+    clearRangeCircles() {
+        this.rangeGraphics.clear();
+    }
+    drawRangeCircle(unit: Unit) {
+        this.rangeGraphics.clear();
+        this.rangeGraphics.lineStyle(3, 0xFFFFFF, 0.8);
+        this.rangeGraphics.strokeCircle(unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2), unit.range);
     }
 
     moveGhost(x: number, y: number) {
@@ -107,9 +129,17 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
 
     shoot(target: Unit) {
-        // [TODO] ROLLS TO HIT
+        // [TODO] Hit Logic
+        let chanceToHit = 0.8;
+        if (target.terrain){
+            chanceToHit *= target.terrain.moveModifier
+        }
+
         this.shootEffect(target)
-        target.damage(1);
+        if (Math.random() < chanceToHit) {
+            target.damage(1);
+        }
+
     }
 
     damage(damage: number) {
@@ -138,8 +168,9 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
 
     shootEffect(target: Unit) {
-        let flashTimes = 3;
-        let delay = 100;
+        const flashTimes = 3;
+        const delay = 100;
+        const lineOffset = this.playerTeam === PLAYERS.BLUE ? 10 : -10
 
         new Promise<void>((resolve) => {
             let completedFlashes = 0;
@@ -147,7 +178,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
                 this.scene.time.delayedCall(i * delay * 2 , () => {
                     this.hitGraphics.lineStyle(4, this.playerColor, 1);
                     this.hitGraphics.setDepth(LAYERS.MOVEMENT_LINES);
-                    this.hitGraphics.lineBetween(this.center.x, this.center.y, target.center.x, target.center.y);
+                    this.hitGraphics.lineBetween(this.center.x, this.center.y, target.center.x + lineOffset, target.center.y);
                 });
     
                 this.scene.time.delayedCall(i * delay * 2 + delay, () => {

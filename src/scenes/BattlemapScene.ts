@@ -13,12 +13,13 @@ const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH * 0.05
 
 class BattlemapScene extends Phaser.Scene {
-    private rangeCircleGraphics: Phaser.GameObjects.Graphics | undefined;
     private deployZoneGraphics: Phaser.GameObjects.Graphics | undefined;
 
     public combatLogic: CombatLogic;
     public terrains: Terrain[] = []
 
+
+    // ToDo - Move to config
     public mapConfig = {
         width: SMALL_MAP_PIXELSIZE_WIDTH,
         height: SMALL_MAP_PIXELSIZE_HEIGHT,
@@ -44,7 +45,7 @@ class BattlemapScene extends Phaser.Scene {
                     452,492
                 ], 
                 moveModifier: 0, 
-                blocksLOS: true,
+                blocksLOS: false,
                 showTerrain: true,
                 type: TerrainType.WATER
             },
@@ -70,6 +71,19 @@ class BattlemapScene extends Phaser.Scene {
                 blocksLOS: false,
                 showTerrain: true,
                 type: TerrainType.ROAD
+            },
+            {
+                scene: this,
+                points: [
+                    258,615,
+                    300,624,
+                    306,608,
+                    266,600
+                ],
+                moveModifier: 0.5,
+                blocksLOS: false,
+                type: TerrainType.CITY,
+                showTerrain: true,
             }
         ],
     }
@@ -89,16 +103,10 @@ class BattlemapScene extends Phaser.Scene {
             unit.deselect();
         })   
     }
-
-    clearRangeCircles() {
-        if (!this.rangeCircleGraphics) this.rangeCircleGraphics = this.add.graphics();
-        this.rangeCircleGraphics?.clear();
-    }
-    drawRangeCircle(unit: Unit) {
-        if (!this.rangeCircleGraphics) this.rangeCircleGraphics = this.add.graphics();
-        this.rangeCircleGraphics?.clear();
-        this.rangeCircleGraphics?.lineStyle(3, 0xFFFFFF, 0.8);
-        this.rangeCircleGraphics?.strokeCircle(unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2), unit.range);
+    clearAllRangeCircles() {
+        this.combatLogic.allUnits.forEach(unit => {
+            unit.clearRangeCircles();
+        })
     }
 
     drawDeployZones() {
@@ -127,13 +135,15 @@ class BattlemapScene extends Phaser.Scene {
                 this.deselectAll()
                 unit.select()
 
-                this.drawRangeCircle(unit);
+                this.clearAllRangeCircles()
+                unit.drawRangeCircle(unit);
             });
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
 
-                this.drawRangeCircle(unit);
+                this.clearAllRangeCircles()
+                unit.drawRangeCircle(unit);
             });
             this.combatLogic.units[unitToLoad.playerId].push(unit)
         })
@@ -172,7 +182,9 @@ class BattlemapScene extends Phaser.Scene {
             console.log("Map Clicked", pointer.x, pointer.y);
             if (gameObjects.length === 0) {
                 this.deselectAll()
-                this.clearRangeCircles()
+                this.combatLogic.allUnits.forEach(unit => {
+                    unit.clearRangeCircles();
+                })
             } 
         });
 

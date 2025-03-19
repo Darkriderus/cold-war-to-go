@@ -3,7 +3,7 @@ export const TOKEN_SIZE = 30
 export const SMALL_MAP_PIXELSIZE_WIDTH = 1200
 export const SMALL_MAP_PIXELSIZE_HEIGHT = 900
 
-export const TICK_PER_ROUND = 5
+export const TICK_PER_ROUND = 1
 export const MIN_SECS_PER_TICK = 1
 
 export const enum LAYERS {
@@ -21,8 +21,9 @@ export const enum MoveType {
 }
 
 export enum TerrainType {
-    WATER = 0,
-    ROAD = 1
+    WATER,
+    ROAD,
+    CITY
 }
 
 export const enum PLAYERS {
