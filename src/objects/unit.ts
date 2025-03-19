@@ -46,11 +46,12 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.setDepth(LAYERS.UNITS)
             .setTint(0x808080)
             .setOrigin(0, 0)
-            .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE);
+            .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE)
+            .setInteractive({ draggable: true });
         scene.add.existing(this);
 
         this.ghost = scene.add.sprite(x, y, this.texture)
-            .setAlpha(0.6)
+            .setAlpha(0)
             .setDepth(LAYERS.GHOSTS)
             .setInteractive({ draggable: true })
             .setOrigin(0, 0)
@@ -123,6 +124,11 @@ export default class Unit extends Phaser.GameObjects.Sprite {
                 });
             }
         })
+    }
+
+    setGhostVisible(visible: boolean) {
+        this.ghost.setAlpha(visible? 0.6 : 0);
+
     }
 
     move(x: number, y: number) {

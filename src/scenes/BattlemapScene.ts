@@ -55,7 +55,7 @@ class BattlemapScene extends Phaser.Scene {
         if (!this.rangeCircleGraphics) this.rangeCircleGraphics = this.add.graphics();
         this.rangeCircleGraphics?.clear();
         this.rangeCircleGraphics?.lineStyle(3, 0xFFFFFF, 0.8);
-        this.rangeCircleGraphics?.strokeCircle(unit.ghost.x + (TOKEN_SIZE / 2), unit.ghost.y + (TOKEN_SIZE / 2), unit.range);
+        this.rangeCircleGraphics?.strokeCircle(unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2), unit.range);
     }
 
     preload() {
@@ -77,6 +77,13 @@ class BattlemapScene extends Phaser.Scene {
             const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * DBG_GAP_BETWEEN_UNITS) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = unitToLoad.playerId === PLAYERS.BLUE ? DBG_GAP_BETWEEN_UNITS : 500
             const unit = new Unit(this, x, y, unitToLoad.texture, unitToLoad);
+            unit.on('pointerdown', () => {
+                this.deselectAll()
+                unit.select()
+
+                this.drawRangeCircle(unit);
+                this.drawDragLine(unit)
+            });
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
@@ -97,18 +104,33 @@ class BattlemapScene extends Phaser.Scene {
 
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
         });
-        this.input.on('drag', (_pointer: Phaser.Input.Pointer, ghost: Unit, dragX: number, dragY: number) => {
-            const connectedUnit = this.combatLogic.allUnits.filter(unit => unit.ghost === ghost)[0]
+        this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite, dragX: number, dragY: number) => {
+            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);        
+            const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
 
-            ghost.setPosition(dragX, dragY);
-            this.drawDragLine(connectedUnit)
+            const diffX = Math.abs(connectedUnit.x - dragX);
+            const diffY = Math.abs(connectedUnit.y - dragY);
+
+            if (diffX < TOKEN_SIZE && diffY < TOKEN_SIZE) {
+                connectedUnit.setGhostVisible(false);
+                connectedUnit.ghost.setPosition(connectedUnit.x, connectedUnit.y);
+                this.clearDragLine()
+            } else {
+                connectedUnit.setGhostVisible(true);
+                connectedUnit.ghost.setPosition(dragX, dragY);
+                this.drawDragLine(connectedUnit)
+            }
+
+           
+            
         });
-        this.input.on('dragend', (_pointer: Phaser.Input.Pointer, ghost: Unit) => {
-            const connectedUnit = this.combatLogic.allUnits.filter(unit => unit.ghost === ghost)[0]
+        this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
+            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);        
+            const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
 
             if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
-            connectedUnit.currentOrder.movementToX = ghost.x;
-            connectedUnit.currentOrder.movementToY = ghost.y;
+            connectedUnit.currentOrder.movementToX = connectedUnit.ghost.x;
+            connectedUnit.currentOrder.movementToY = connectedUnit.ghost.y;
             connectedUnit.currentOrder.movementType = battleUiScene.selectedOrderType;
 
         });    
