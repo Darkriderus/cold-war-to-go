@@ -1,4 +1,4 @@
-export const GRID_SIZE = 30
+export const TOKEN_SIZE = 30
 
 export const SMALL_MAP_PIXELSIZE_WIDTH = 1200
 export const SMALL_MAP_PIXELSIZE_HEIGHT = 900

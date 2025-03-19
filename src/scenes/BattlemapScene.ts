@@ -1,4 +1,4 @@
-import { GRID_SIZE, LAYERS, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from "../helper/constants"
+import { LAYERS, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
 import CombatLogic from "../logic/combat-logic"
@@ -6,6 +6,7 @@ import BattleUI from "./BattleUI"
 
 // TODO/IDEAS
 // FFT-Values with 10x Health
+// Move with D&D, Buttons for Targets as if dragged
 
 const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
@@ -17,10 +18,14 @@ class BattlemapScene extends Phaser.Scene {
     public combatLogic: CombatLogic;
 
     constructor() {
-        super({ key: 'BattleMap', active: true });
+        console.log("-- Batlemap Initializing.. --")
 
+        super({ key: 'BattleMap', active: true });
         this.combatLogic = new CombatLogic();
         this.combatLogic.initialize(this);
+
+        console.log("-- ..Done! --")
+
     }
 
     deselectAll() {
@@ -38,7 +43,7 @@ class BattlemapScene extends Phaser.Scene {
         this.dragLineGraphics?.clear();
         this.dragLineGraphics?.setDepth(LAYERS.MOVEMENT_LINES);
         this.dragLineGraphics?.lineStyle(2, 0xFFFFFFF, 0.4);
-        this.dragLineGraphics?.lineBetween(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.x + (GRID_SIZE / 2), unit.y + (GRID_SIZE / 2));
+        this.dragLineGraphics?.lineBetween(unit.ghost.x + (TOKEN_SIZE / 2), unit.ghost.y + (TOKEN_SIZE / 2), unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2));
     }
 
     clearMovementRange() {
@@ -49,7 +54,7 @@ class BattlemapScene extends Phaser.Scene {
         if (!this.movementRangeGraphics) this.movementRangeGraphics = this.add.graphics();
         this.movementRangeGraphics?.clear();
         this.movementRangeGraphics?.lineStyle(3, 0xFFFFFF, 0.8);
-        this.movementRangeGraphics?.strokeCircle(unit.ghost.x + (GRID_SIZE / 2), unit.ghost.y + (GRID_SIZE / 2), unit.movementPerTick);
+        this.movementRangeGraphics?.strokeCircle(unit.ghost.x + (TOKEN_SIZE / 2), unit.ghost.y + (TOKEN_SIZE / 2), unit.movementPerTick);
     }
 
     preload() {
@@ -68,7 +73,7 @@ class BattlemapScene extends Phaser.Scene {
         unitList.units.forEach((unitToLoad, i: number) => {
             const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * DBG_GAP_BETWEEN_UNITS) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = unitToLoad.playerId === PLAYERS.BLUE ? DBG_GAP_BETWEEN_UNITS : SMALL_MAP_PIXELSIZE_HEIGHT - DBG_GAP_BETWEEN_UNITS
-            const unit = new Unit(this, x, y, unitToLoad.texture, { movementPerTick: unitToLoad.movementPerTick, playerId: unitToLoad.playerId, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
+            const unit = new Unit(this, x, y, unitToLoad.texture, { movementPerTick: unitToLoad.movementPerTick, playerId: unitToLoad.playerId, name: unitToLoad.name });
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()

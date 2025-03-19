@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GRID_SIZE, LAYERS, MoveType, PLAYERS } from '../helper/constants';
+import { LAYERS, MoveType, PLAYERS, TOKEN_SIZE } from '../helper/constants';
 
 type IUnit = {
     movementPerTick: number;
@@ -27,14 +27,10 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
         const colorSuffix = unitInfo.playerId === PLAYERS.BLUE ? '_blue' : '_red';
-        console.log(unitInfo.playerId)
         super(scene, x, y, texture + colorSuffix);
 
-        console.log(texture + colorSuffix)
         this.movementPerTick = unitInfo.movementPerTick;
         this.playerId = unitInfo.playerId;
-
-     
 
         this.initialX = x;
         this.initialY = y;
@@ -42,6 +38,8 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         // this.setInteractive({ draggable: true })
         this.setDepth(LAYERS.UNITS)
         this.setTint(0x808080);
+        this.setOrigin(0, 0)
+        this.setDisplaySize(TOKEN_SIZE, TOKEN_SIZE)
         scene.add.existing(this);
 
         this.ghost = scene.add.sprite(x, y, this.texture)
@@ -49,7 +47,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setDepth(LAYERS.GHOSTS)
             .setInteractive({ draggable: true })
             .setOrigin(0, 0)
-            .setDisplaySize(GRID_SIZE, GRID_SIZE);
+            .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE);
     }
 
     select() {
