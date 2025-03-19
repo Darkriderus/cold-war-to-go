@@ -27,14 +27,13 @@ export default class CombatLogic {
     }
 
     async acceptOrders() { 
-        console.log(this.units[PLAYERS.BLUE])
-
+        console.log("-- Order Accepted, Starting Round --")
         this.lockUnits(PLAYERS.BLUE)
 
         await this.calculateRound();
         
         this.unlockUnits(PLAYERS.BLUE)
-
+        console.log("-- Round Done! --")
     }
 
     calculateRound() { 
@@ -43,7 +42,7 @@ export default class CombatLogic {
                 this.battleMapScene!.time.addEvent({
                     delay: MIN_SECS_PER_TICK * 1000,
                     callback: () => {
-                        this.handleTick();
+                        this.handleTick(tick);
                         tick += 1
                         if (tick >= TICK_PER_ROUND) {
                             resolve(true)
@@ -57,7 +56,8 @@ export default class CombatLogic {
 
 
 
-    handleTick(): void {    
+    handleTick(tick: number): void {    
+        console.log("-- Tick " + tick + " --")
         this.units[PLAYERS.BLUE].forEach(unit => {
             if (unit.currentOrder === null) return
             const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
