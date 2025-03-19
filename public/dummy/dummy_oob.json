@@ -35,6 +35,7 @@
       "range": 500
     },
 
+
     {
       "name": "MBT A",
       "movementPerTick": 10,
@@ -53,6 +54,14 @@
     },
     {
       "name": "MBT C",
+      "movementPerTick": 10,
+      "health": 10,
+      "playerId": 1,
+      "texture": "tank",
+      "range": 500
+    },
+    {
+      "name": "MBT D",
       "movementPerTick": 10,
       "health": 10,
       "playerId": 1,

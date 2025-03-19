@@ -1,4 +1,4 @@
-import { PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TOKEN_SIZE } from "../helper/constants"
+import { PLAYER_COLOR, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
 import CombatLogic from "../logic/combat-logic"
@@ -9,15 +9,30 @@ import BattleUI from "./BattleUI"
 // Move with D&D, Buttons for Targets as if dragged
 
 const DBG_GAP_BETWEEN_UNITS = 50
-const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
+const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH * 0.05
 
 class BattlemapScene extends Phaser.Scene {
     private rangeCircleGraphics: Phaser.GameObjects.Graphics | undefined;
+    private deployZoneGraphics: Phaser.GameObjects.Graphics | undefined;
 
     public combatLogic: CombatLogic;
 
+    public mapConfig = {
+        width: SMALL_MAP_PIXELSIZE_WIDTH,
+        height: SMALL_MAP_PIXELSIZE_HEIGHT,
+        mapTexture: 'bg',
+        blueDeploy: {
+            x1: SMALL_MAP_PIXELSIZE_WIDTH * 0.35, y1: SMALL_MAP_PIXELSIZE_HEIGHT * 0.0,
+            x2: SMALL_MAP_PIXELSIZE_WIDTH * 0.95, y2: SMALL_MAP_PIXELSIZE_HEIGHT * 0.2,
+        },
+        redDeploy: {
+            x1: SMALL_MAP_PIXELSIZE_WIDTH * 0.09, y1: SMALL_MAP_PIXELSIZE_HEIGHT * 0.65,
+            x2: SMALL_MAP_PIXELSIZE_WIDTH * 0.5, y2: SMALL_MAP_PIXELSIZE_HEIGHT * 0.9,
+        }
+    }
+
     constructor() {
-        console.log("-- Batlemap Initializing.. --")
+        console.log("-- Battlemap Initializing.. --")
 
         super({ key: 'BattleMap', active: true });
         this.combatLogic = new CombatLogic();
@@ -43,25 +58,28 @@ class BattlemapScene extends Phaser.Scene {
         this.rangeCircleGraphics?.strokeCircle(unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2), unit.range);
     }
 
-    preload() {
-        this.load.image('bg', 'public/sprites/Testmap.png');
-        this.load.image('tank_red', 'public/sprites/units/tank_red.svg');
-        this.load.image('tank_blue', 'public/sprites/units/tank_blue.svg');
-        this.load.image('tank_grey', 'public/sprites/units/tank_grey.svg');
-
-        this.load.image('apc_red', 'public/sprites/units/apc_red.svg');
-        this.load.image('apc_blue', 'public/sprites/units/apc_blue.svg');
+    drawDeployZones() {
+        this.deployZoneGraphics?.clear();
+        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.BLUE, 0.15); 
+        this.deployZoneGraphics?.fillRect(
+            this.mapConfig.blueDeploy.x1, 
+            this.mapConfig.blueDeploy.y1, 
+            this.mapConfig.blueDeploy.x2 - this.mapConfig.blueDeploy.x1, 
+            this.mapConfig.blueDeploy.y2 - this.mapConfig.blueDeploy.y1);
+        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.RED, 0.15); 
+        this.deployZoneGraphics?.fillRect(
+            this.mapConfig.redDeploy.x1, 
+            this.mapConfig.redDeploy.y1, 
+            this.mapConfig.redDeploy.x2 - this.mapConfig.redDeploy.x1, 
+            this.mapConfig.redDeploy.y2 - this.mapConfig.redDeploy.y1);
     }
 
-    create() {
-        const battleUiScene = this.scene.get('BattleUI') as BattleUI;
-    
-        this.add.image(SMALL_MAP_PIXELSIZE_WIDTH / 2, SMALL_MAP_PIXELSIZE_HEIGHT / 2, 'bg').setDisplaySize(SMALL_MAP_PIXELSIZE_WIDTH, SMALL_MAP_PIXELSIZE_HEIGHT);
+    deployUnits(playerTeam: PLAYERS) {
+        unitList.units.filter(unit => unit.playerId === playerTeam).forEach((unitToLoad, idx) => {
+            const leftEdge = playerTeam === PLAYERS.BLUE ? this.mapConfig.blueDeploy.x1 + DBG_OFFSET : this.mapConfig.redDeploy.x1 + DBG_OFFSET;
+            const topEdge = playerTeam === PLAYERS.BLUE ? this.mapConfig.blueDeploy.y1 + DBG_OFFSET : this.mapConfig.redDeploy.y1 + DBG_OFFSET
 
-        unitList.units.forEach((unitToLoad, i: number) => {
-            const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * DBG_GAP_BETWEEN_UNITS) + (i * DBG_GAP_BETWEEN_UNITS)
-            const y = unitToLoad.playerId === PLAYERS.BLUE ? DBG_GAP_BETWEEN_UNITS : 500
-            const unit = new Unit(this, x, y, unitToLoad.texture, unitToLoad);
+            const unit = new Unit(this, (leftEdge + (idx * DBG_GAP_BETWEEN_UNITS)), topEdge, unitToLoad.texture, unitToLoad);
             unit.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
@@ -76,7 +94,31 @@ class BattlemapScene extends Phaser.Scene {
             });
             this.combatLogic.units[unitToLoad.playerId].push(unit)
         })
+    }
+
+    preload() {
+        this.load.image('bg', 'public/sprites/Testmap.png');
+        this.load.image('tank_red', 'public/sprites/units/tank_red.svg');
+        this.load.image('tank_blue', 'public/sprites/units/tank_blue.svg');
+        this.load.image('tank_grey', 'public/sprites/units/tank_grey.svg');
+
+        this.load.image('apc_red', 'public/sprites/units/apc_red.svg');
+        this.load.image('apc_blue', 'public/sprites/units/apc_blue.svg');
+    }
+
+    create() {
+        const battleUiScene = this.scene.get('BattleUI') as BattleUI;
+    
+        this.add.image(this.mapConfig.width / 2, this.mapConfig.height / 2, 'bg').setDisplaySize(this.mapConfig.width, this.mapConfig.height);
+        
+        this.deployZoneGraphics = this.add.graphics();
+        this.drawDeployZones();
+
+
+        this.deployUnits(PLAYERS.BLUE);
+        this.deployUnits(PLAYERS.RED);
         this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
+            console.log("COORD", _pointer.x, _pointer.y);
             if (gameObjects.length === 0) {
                 this.deselectAll()
                 this.clearRangeCircles()
