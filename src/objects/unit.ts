@@ -43,7 +43,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.setDepth(LAYERS.UNITS)
             .setTint(0x808080)
             .setOrigin(0, 0)
-            .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE)
+            .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE);
         scene.add.existing(this);
 
         this.ghost = scene.add.sprite(x, y, this.texture)
@@ -53,6 +53,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setOrigin(0, 0)
             .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE);
 
+
         this.healthLabel = scene.add.text(x, y + (TOKEN_SIZE),`(${this.health}/${this.maxHealth})`)
             .setFontSize(12)
             .setDepth(LAYERS.UNITS)
@@ -60,8 +61,40 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
 
     shoot(target: Unit) {
-        target.health -= 1
-        target.healthLabel.text = `(${target.health}/${target.maxHealth})`
+        // [TODO] ROLLS TO HIT
+        this.shootEffect()
+        target.damage(1);
+    }
+
+    damage(damage: number) {
+        this.health -= damage;
+        
+        if(this.health <= 0) {
+            // this.destroy();
+            this.health = 0
+        }
+        this.hitEffect()
+        this.healthLabel.text = `(${this.health}/${this.maxHealth})`
+    }
+
+    hitEffect() {
+        let flashTimes = 3;
+        let delay = 100;
+
+        for (let i = 0; i < flashTimes; i++) {
+            this.scene.time.delayedCall(i * delay * 2, () => this.setVisible(false));
+            this.scene.time.delayedCall(i * delay * 2 + delay, () => this.setVisible(true));
+        }
+    }
+
+    shootEffect() {
+        let flashTimes = 3;
+        let delay = 100;
+
+        for (let i = 0; i < flashTimes; i++) {
+            this.scene.time.delayedCall(i * delay * 2, () => this.setVisible(false));
+            this.scene.time.delayedCall(i * delay * 2 + delay, () => this.setVisible(true));
+        }
     }
 
     move(x: number, y: number) {

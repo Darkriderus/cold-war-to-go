@@ -6,7 +6,7 @@
       "health": 10,
       "playerId": 0,
       "texture": "tank",
-      "range": 300
+      "range": 1000
     },
 
     {

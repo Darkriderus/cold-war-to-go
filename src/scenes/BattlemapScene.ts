@@ -30,7 +30,7 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     deselectAll() {
-        this.combatLogic.units[PLAYERS.BLUE].forEach(unit => {
+        this.combatLogic.allUnits.forEach(unit => {
             unit.deselect();
         })   
     }
@@ -96,15 +96,13 @@ class BattlemapScene extends Phaser.Scene {
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
         });
         this.input.on('drag', (_pointer: Phaser.Input.Pointer, ghost: Unit, dragX: number, dragY: number) => {
-            const allUnits = [...this.combatLogic.units[PLAYERS.BLUE], ...this.combatLogic.units[PLAYERS.RED]]
-            const connectedUnit = allUnits.filter(unit => unit.ghost === ghost)[0]
+            const connectedUnit = this.combatLogic.allUnits.filter(unit => unit.ghost === ghost)[0]
 
             ghost.setPosition(dragX, dragY);
             this.drawDragLine(connectedUnit)
         });
         this.input.on('dragend', (_pointer: Phaser.Input.Pointer, ghost: Unit) => {
-            const allUnits = [...this.combatLogic.units[PLAYERS.BLUE], ...this.combatLogic.units[PLAYERS.RED]]
-            const connectedUnit = allUnits.filter(unit => unit.ghost === ghost)[0]
+            const connectedUnit = this.combatLogic.allUnits.filter(unit => unit.ghost === ghost)[0]
 
             if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
             connectedUnit.currentOrder.movementToX = ghost.x;
