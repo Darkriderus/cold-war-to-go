@@ -6,6 +6,7 @@ type IUnit = {
     playerId: number;
     name: string;
     health: number;
+    range: number;
 }
 
 type Order = {
@@ -20,6 +21,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     public playerId: number;
     public maxHealth: number;
     public health: number;
+    public range: number;
     
     public selected: boolean = false;
     public currentOrder: Order | null = null
@@ -34,6 +36,8 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.playerId = unitInfo.playerId;
         this.health = unitInfo.health;
         this.maxHealth = unitInfo.health;
+        this.range = unitInfo.range;
+        this.name = unitInfo.name;
 
         // this.setInteractive({ draggable: true })
         this.setDepth(LAYERS.UNITS)
@@ -53,6 +57,11 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setFontSize(12)
             .setDepth(LAYERS.UNITS)
             .setBackgroundColor("grey").setOrigin(0, 0);
+    }
+
+    shoot(target: Unit) {
+        target.health -= 1
+        target.healthLabel.text = `(${target.health}/${target.maxHealth})`
     }
 
     move(x: number, y: number) {

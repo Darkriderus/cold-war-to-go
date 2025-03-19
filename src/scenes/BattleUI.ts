@@ -82,7 +82,7 @@ class BattleUI extends Phaser.Scene {
             .on('pointerdown', () => {
                 battlemapScene.deselectAll();
                 battlemapScene.clearDragLine();
-                battlemapScene.clearMovementRange();
+                battlemapScene.clearRangeCircles();
                 battlemapScene.combatLogic.acceptOrders()
             })
         
