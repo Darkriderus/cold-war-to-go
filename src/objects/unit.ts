@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { LAYERS, MoveType, PLAYERS, TOKEN_SIZE } from '../helper/constants';
+import { LAYERS, MoveType, PLAYER_COLOR, PLAYERS, TOKEN_SIZE } from '../helper/constants';
 
 type IUnit = {
     movementPerTick: number;
@@ -29,11 +29,13 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     public healthLabel: Phaser.GameObjects.Text;
 
     public hitGraphics: Phaser.GameObjects.Graphics;
+    public moveGraphics: Phaser.GameObjects.Graphics;
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
         const colorSuffix = unitInfo.playerId === PLAYERS.BLUE ? '_blue' : '_red';
         super(scene, x, y, texture + colorSuffix);
         this.hitGraphics = this.scene.add.graphics();
+        this.moveGraphics = this.scene.add.graphics();
 
         this.movementPerTick = unitInfo.movementPerTick;
         this.playerId = unitInfo.playerId;
@@ -64,6 +66,41 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setBackgroundColor("grey").setOrigin(0, 0);
     }
 
+    get center() {
+        return { x: this.x + (TOKEN_SIZE / 2), y: this.y + (TOKEN_SIZE / 2) };
+    }
+
+    get ghostCenter() {
+        return { x: this.ghost.x + (TOKEN_SIZE / 2), y: this.ghost.y + (TOKEN_SIZE / 2) };
+    }
+
+    get playerColor() {
+        return this.playerId === PLAYERS.BLUE ? PLAYER_COLOR.BLUE : PLAYER_COLOR.RED;
+    }
+
+    get playerTeam() {
+        return this.playerId === PLAYERS.BLUE ? PLAYERS.BLUE : PLAYERS.RED;
+    }
+
+    get alive() {
+        return this.health > 0;
+    }
+
+    redrawMoveLine() {  
+        this.moveGraphics.clear();
+        if (!this.alive) return
+        this.moveGraphics.setDepth(LAYERS.MOVEMENT_LINES);
+        this.moveGraphics.lineStyle(2, this.playerColor, 0.6);
+        this.moveGraphics.lineBetween(this.ghostCenter.x, this.ghostCenter.y, this.center.x, this.center.y);
+    }
+
+    moveGhost(x: number, y: number) {
+        this.ghost.x = x;
+        this.ghost.y = y;
+
+        this.redrawMoveLine()
+    }
+
     decideTargetToShoot(targetsInRange: {unit:Unit, distance: number}[]) {
         // [TODO] Add logic
         if (targetsInRange.length === 0) return null
@@ -80,8 +117,9 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.health -= damage;
         
         if(this.health <= 0) {
-            console.log(`!!!!!!!${this.name} died!`)
+            console.log(`!!${this.name} died!`)
             // this.destroy();
+            this.moveGraphics.clear();
             this.setTexture("tank_grey")
             this.ghost.setTexture("tank_grey").setVisible(false)
             this.health = 0
@@ -108,9 +146,9 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             let completedFlashes = 0;
             for (let i = 0; i < flashTimes; i++) {
                 this.scene.time.delayedCall(i * delay * 2 , () => {
-                    this.hitGraphics.lineStyle(4, this.playerId === PLAYERS.BLUE ? 0x0000FF : 0xFF0000, 1);
+                    this.hitGraphics.lineStyle(4, this.playerColor, 1);
                     this.hitGraphics.setDepth(LAYERS.MOVEMENT_LINES);
-                    this.hitGraphics.lineBetween(this.x + (TOKEN_SIZE / 2), this.y + (TOKEN_SIZE / 2), target.x + (TOKEN_SIZE / 2), target.y + (TOKEN_SIZE / 2));
+                    this.hitGraphics.lineBetween(this.center.x, this.center.y, target.center.x, target.center.y);
                 });
     
                 this.scene.time.delayedCall(i * delay * 2 + delay, () => {
@@ -136,6 +174,8 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.y = y;
         this.healthLabel.x = x;
         this.healthLabel.y = y + (TOKEN_SIZE);
+
+        this.redrawMoveLine()
     }
 
     select() {

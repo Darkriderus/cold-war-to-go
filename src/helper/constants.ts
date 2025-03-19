@@ -25,3 +25,7 @@ export const enum PLAYERS {
     RED = 1
 }
 
+export const enum PLAYER_COLOR {
+    BLUE = 0x0000FF,
+    RED = 0xFF0000
+}

@@ -26,8 +26,8 @@ export default class CombatLogic {
 
     unlockUnits(playerId : PLAYERS) {
         this.units[playerId].forEach(unit => {
-            unit.setInteractive({ draggable: false });
-            unit.ghost.setInteractive({ draggable: true });
+                unit.setInteractive({ draggable: false });
+                unit.ghost.setInteractive({ draggable: unit.alive });
         });
     }
 
@@ -103,7 +103,7 @@ export default class CombatLogic {
         
                 // SHOOT
                 const targetsInRange = enemyAliveUnits.map(enemyUnit => {
-                    const distance = Phaser.Math.Distance.Between(unit.x, unit.y, enemyUnit.x, enemyUnit.y);
+                    const distance = Phaser.Math.Distance.Between(unit.center.x, unit.center.y, enemyUnit.center.x, enemyUnit.center.y);
                     return { unit: enemyUnit, distance }
                 }).filter(target => target.distance <= unit.range);
 

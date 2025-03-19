@@ -81,7 +81,6 @@ class BattleUI extends Phaser.Scene {
             })
             .on('pointerdown', () => {
                 battlemapScene.deselectAll();
-                battlemapScene.clearDragLine();
                 battlemapScene.clearRangeCircles();
                 battlemapScene.combatLogic.acceptOrders()
             })
@@ -90,16 +89,3 @@ class BattleUI extends Phaser.Scene {
 }
 
 export default BattleUI
-
-// const button = this.add.text(x, y, text, {
-//     fontSize: '24px',
-//     backgroundColor: '#00FF00',
-//     padding: { x: 10, y: 5 },
-// })
-// .setOrigin(0,0)
-// .setInteractive()
-// .on('pointerdown', callback)
-// .on('pointerover', () => button.setBackgroundColor('#00FF00'))
-// .on('pointerout', () => button.setBackgroundColor('#00FF00'));
-
-// return button;

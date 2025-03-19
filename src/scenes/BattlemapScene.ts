@@ -1,4 +1,4 @@
-import { LAYERS, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TOKEN_SIZE } from "../helper/constants"
+import { PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
 import CombatLogic from "../logic/combat-logic"
@@ -12,9 +12,7 @@ const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
 
 class BattlemapScene extends Phaser.Scene {
-    private dragLineGraphics: Phaser.GameObjects.Graphics | undefined;
     private rangeCircleGraphics: Phaser.GameObjects.Graphics | undefined;
-
 
     public combatLogic: CombatLogic;
 
@@ -26,25 +24,12 @@ class BattlemapScene extends Phaser.Scene {
         this.combatLogic.initialize(this);
 
         console.log("-- ..Done! --")
-
     }
 
     deselectAll() {
         this.combatLogic.allUnits.forEach(unit => {
             unit.deselect();
         })   
-    }
-
-    clearDragLine() {
-        if (!this.dragLineGraphics) this.dragLineGraphics = this.add.graphics();
-        this.dragLineGraphics?.clear();
-    }
-    drawDragLine(unit: Unit) {
-        if (!this.dragLineGraphics) this.dragLineGraphics = this.add.graphics();
-        this.dragLineGraphics?.clear();
-        this.dragLineGraphics?.setDepth(LAYERS.MOVEMENT_LINES);
-        this.dragLineGraphics?.lineStyle(2, 0xFFFFFFF, 0.4);
-        this.dragLineGraphics?.lineBetween(unit.ghost.x + (TOKEN_SIZE / 2), unit.ghost.y + (TOKEN_SIZE / 2), unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2));
     }
 
     clearRangeCircles() {
@@ -82,21 +67,18 @@ class BattlemapScene extends Phaser.Scene {
                 unit.select()
 
                 this.drawRangeCircle(unit);
-                this.drawDragLine(unit)
             });
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
 
                 this.drawRangeCircle(unit);
-                this.drawDragLine(unit)
             });
             this.combatLogic.units[unitToLoad.playerId].push(unit)
         })
         this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
             if (gameObjects.length === 0) {
                 this.deselectAll()
-                this.clearDragLine()
                 this.clearRangeCircles()
             } 
         });
@@ -113,12 +95,10 @@ class BattlemapScene extends Phaser.Scene {
 
             if (diffX < TOKEN_SIZE && diffY < TOKEN_SIZE) {
                 connectedUnit.setGhostVisible(false);
-                connectedUnit.ghost.setPosition(connectedUnit.x, connectedUnit.y);
-                this.clearDragLine()
+                connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
             } else {
                 connectedUnit.setGhostVisible(true);
-                connectedUnit.ghost.setPosition(dragX, dragY);
-                this.drawDragLine(connectedUnit)
+                connectedUnit.moveGhost(dragX, dragY);
             }
 
            
