@@ -3,6 +3,10 @@ import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
 import CombatLogic from "../logic/combat-logic"
 
+// TODO/IDEAS
+// Tick-System
+// FFT-Values with 10x Health
+
 const DBG_GAP_BETWEEN_UNITS = GRID_SIZE
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
 
@@ -51,7 +55,7 @@ class BattlemapScene extends Phaser.Scene {
     preload() {
         this.load.image('bg', 'public/sprites/Testmap.png');
         this.load.image('unit_blue', 'public/sprites/Unit_Blue.png');
-        this.load.image('unit_selected', 'public/sprites/Unit_Blue.png');
+        this.load.image('unit_ghost', 'public/sprites/Unit_Green.png');
     }
 
     create() {
@@ -62,7 +66,7 @@ class BattlemapScene extends Phaser.Scene {
             const y = GRID_SIZE
 
             const unit = new Unit(this, x, y, unitToLoad.texture, { speed: unitToLoad.speed, playerId: 1, name: unitToLoad.name }).setOrigin(0, 0).setDisplaySize(GRID_SIZE, GRID_SIZE);
-            unit.on('pointerdown', () => {
+            unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
 
@@ -78,7 +82,7 @@ class BattlemapScene extends Phaser.Scene {
                     this.deselectAll()
                     this.clearDragLine()
                     this.clearMovementRange()
-                }
+                } 
             });
         }
         // SELECT LOGIC END
@@ -86,18 +90,22 @@ class BattlemapScene extends Phaser.Scene {
 
         // DRAG LOGIC START - To be modularized
         {
-            this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _sprite: Unit) => {
+            this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
             });
 
-            this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Unit, dragX: number, dragY: number) => {
-                sprite.setPosition(dragX, dragY);
-                this.drawDragLine(sprite)
+            this.input.on('drag', (_pointer: Phaser.Input.Pointer, ghost: Unit, dragX: number, dragY: number) => {
+                const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
+
+                ghost.setPosition(dragX, dragY);
+                this.drawDragLine(connectedUnit)
             });
-            this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
-                if (!sprite.currentOrder) sprite.currentOrder = {};
-                sprite.currentOrder.targetX = sprite.x;
-                sprite.currentOrder.targetY = sprite.y;
-            });
+            this.input.on('dragend', (_pointer: Phaser.Input.Pointer, ghost: Unit) => {
+                const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
+
+                if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
+                connectedUnit.currentOrder.targetX = ghost.x;
+                connectedUnit.currentOrder.targetY = ghost.y;
+            });    
         }
         // DRAG LOGIC END
     }
