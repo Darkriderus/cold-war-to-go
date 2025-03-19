@@ -66,8 +66,6 @@ class BattleUI extends Phaser.Scene {
     }
 }
 
-
-
 export default BattleUI
 
 // const button = this.add.text(x, y, text, {
