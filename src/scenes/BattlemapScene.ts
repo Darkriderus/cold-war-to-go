@@ -12,8 +12,9 @@ const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH / 3
 
 class BattlemapScene extends Phaser.Scene {
-    private movementRangeGraphics: Phaser.GameObjects.Graphics | undefined;
     private dragLineGraphics: Phaser.GameObjects.Graphics | undefined;
+    private rangeCircleGraphics: Phaser.GameObjects.Graphics | undefined;
+
 
     public combatLogic: CombatLogic;
 
@@ -46,15 +47,15 @@ class BattlemapScene extends Phaser.Scene {
         this.dragLineGraphics?.lineBetween(unit.ghost.x + (TOKEN_SIZE / 2), unit.ghost.y + (TOKEN_SIZE / 2), unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2));
     }
 
-    clearMovementRange() {
-        if (!this.movementRangeGraphics) this.movementRangeGraphics = this.add.graphics();
-        this.movementRangeGraphics?.clear();
+    clearRangeCircles() {
+        if (!this.rangeCircleGraphics) this.rangeCircleGraphics = this.add.graphics();
+        this.rangeCircleGraphics?.clear();
     }
-    drawMovementRange(unit: Unit) {
-        if (!this.movementRangeGraphics) this.movementRangeGraphics = this.add.graphics();
-        this.movementRangeGraphics?.clear();
-        this.movementRangeGraphics?.lineStyle(3, 0xFFFFFF, 0.8);
-        this.movementRangeGraphics?.strokeCircle(unit.ghost.x + (TOKEN_SIZE / 2), unit.ghost.y + (TOKEN_SIZE / 2), unit.movementPerTick);
+    drawRangeCircle(unit: Unit) {
+        if (!this.rangeCircleGraphics) this.rangeCircleGraphics = this.add.graphics();
+        this.rangeCircleGraphics?.clear();
+        this.rangeCircleGraphics?.lineStyle(3, 0xFFFFFF, 0.8);
+        this.rangeCircleGraphics?.strokeCircle(unit.ghost.x + (TOKEN_SIZE / 2), unit.ghost.y + (TOKEN_SIZE / 2), unit.range);
     }
 
     preload() {
@@ -72,36 +73,38 @@ class BattlemapScene extends Phaser.Scene {
 
         unitList.units.forEach((unitToLoad, i: number) => {
             const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * DBG_GAP_BETWEEN_UNITS) + (i * DBG_GAP_BETWEEN_UNITS)
-            const y = unitToLoad.playerId === PLAYERS.BLUE ? DBG_GAP_BETWEEN_UNITS : SMALL_MAP_PIXELSIZE_HEIGHT - DBG_GAP_BETWEEN_UNITS
+            const y = unitToLoad.playerId === PLAYERS.BLUE ? DBG_GAP_BETWEEN_UNITS : 500
             const unit = new Unit(this, x, y, unitToLoad.texture, unitToLoad);
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
 
+                this.drawRangeCircle(unit);
                 this.drawDragLine(unit)
             });
-            this.combatLogic.units[PLAYERS.BLUE].push(unit)
+            this.combatLogic.units[unitToLoad.playerId].push(unit)
         })
         this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
             if (gameObjects.length === 0) {
                 this.deselectAll()
                 this.clearDragLine()
-                this.clearMovementRange()
+                this.clearRangeCircles()
             } 
         });
 
 
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
         });
-
         this.input.on('drag', (_pointer: Phaser.Input.Pointer, ghost: Unit, dragX: number, dragY: number) => {
-            const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
+            const allUnits = [...this.combatLogic.units[PLAYERS.BLUE], ...this.combatLogic.units[PLAYERS.RED]]
+            const connectedUnit = allUnits.filter(unit => unit.ghost === ghost)[0]
 
             ghost.setPosition(dragX, dragY);
             this.drawDragLine(connectedUnit)
         });
         this.input.on('dragend', (_pointer: Phaser.Input.Pointer, ghost: Unit) => {
-            const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
+            const allUnits = [...this.combatLogic.units[PLAYERS.BLUE], ...this.combatLogic.units[PLAYERS.RED]]
+            const connectedUnit = allUnits.filter(unit => unit.ghost === ghost)[0]
 
             if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
             connectedUnit.currentOrder.movementToX = ghost.x;

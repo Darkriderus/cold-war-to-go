@@ -29,10 +29,14 @@ export default class CombatLogic {
     async acceptOrders() { 
         console.log("-- Order Accepted, Starting Round --")
         this.lockUnits(PLAYERS.BLUE)
+        this.lockUnits(PLAYERS.RED)
+
 
         await this.calculateRound();
         
         this.unlockUnits(PLAYERS.BLUE)
+        this.unlockUnits(PLAYERS.RED)
+
         console.log("-- Round Done! --")
     }
 
@@ -58,21 +62,49 @@ export default class CombatLogic {
 
     handleTick(tick: number): void {    
         console.log("-- Tick " + tick + " --")
-        this.units[PLAYERS.BLUE].forEach(unit => {
-            if (unit.currentOrder === null) return
-            const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
-            if (distanceLeft < unit.movementPerTick) {
-                unit.x = unit.currentOrder?.movementToX!;
-                unit.y = unit.currentOrder?.movementToY!;
-            }
-            else {
-                const angle = Phaser.Math.Angle.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
-                const newX = unit.x + Math.cos(angle) * unit.movementPerTick;
-                const newY = unit.y + Math.sin(angle) * unit.movementPerTick;
+        this.units.forEach((playerUnits, playerId) => {
+            const enemyUnits = this.units[playerId === PLAYERS.BLUE ? PLAYERS.RED : PLAYERS.BLUE]
 
-                unit.move(newX, newY)
-            }
+            playerUnits.forEach(unit => {
+                console.log(`[${unit.playerId === PLAYERS.BLUE ? 'Blue' : 'Red'}] unit ${unit.name}..`);
+                if (unit.currentOrder === null) {
+                    console.log("   >no order");
+                } else {
+                    // MOVE
+                    const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
+                    if (distanceLeft === 0) {
+                        console.log("   >stop.");
+
+                        return
+                    }
+
+                    if (distanceLeft < unit.movementPerTick) {
+                        unit.move(unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!)
+                        console.log("   >move+stop");
+                    }
+                    else {
+                        const angle = Phaser.Math.Angle.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
+                        const newX = unit.x + Math.cos(angle) * unit.movementPerTick;
+                        const newY = unit.y + Math.sin(angle) * unit.movementPerTick;
+        
+                        unit.move(newX, newY)
+                        console.log("   >move");
+                    }
+                }
+        
+                // SHOOT
+        
+                enemyUnits.forEach(enemyUnit => {
+                    const distance = Phaser.Math.Distance.Between(unit.x, unit.y, enemyUnit.x, enemyUnit.y);
+                    if (distance <= unit.range) {
+                        console.log(`   >!shoot ${enemyUnit.name}`);
+                        unit.shoot(enemyUnit);
+                    }
+                })
+    
+            })
         })
+        
     }
 
 
