@@ -2,6 +2,7 @@ import { GRID_SIZE, LAYERS, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXEL
 import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
 import CombatLogic from "../logic/combat-logic"
+import BattleUI from "./BattleUI"
 
 // TODO/IDEAS
 // FFT-Values with 10x Health
@@ -60,6 +61,8 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     create() {
+        const battleUiScene = this.scene.get('BattleUI') as BattleUI;
+    
         this.add.image(SMALL_MAP_PIXELSIZE_WIDTH / 2, SMALL_MAP_PIXELSIZE_HEIGHT / 2, 'bg').setDisplaySize(SMALL_MAP_PIXELSIZE_WIDTH, SMALL_MAP_PIXELSIZE_HEIGHT);
 
         unitList.units.forEach((unitToLoad, i: number) => {
@@ -100,6 +103,8 @@ class BattlemapScene extends Phaser.Scene {
                 if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
                 connectedUnit.currentOrder.movementToX = ghost.x;
                 connectedUnit.currentOrder.movementToY = ghost.y;
+                connectedUnit.currentOrder.movementType = battleUiScene.selectedOrderType;
+
             });    
         }
         // DRAG LOGIC END

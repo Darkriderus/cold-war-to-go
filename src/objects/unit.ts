@@ -1,15 +1,10 @@
 import Phaser from 'phaser';
-import { GRID_SIZE, LAYERS, PLAYERS } from '../helper/constants';
+import { GRID_SIZE, LAYERS, MoveType, PLAYERS } from '../helper/constants';
 
 type IUnit = {
     movementPerTick: number;
     playerId: number;
     name: string;
-}
-
-enum MoveType {
-    MOVE,
-    ATTACK
 }
 
 type Order = {

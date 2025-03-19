@@ -15,6 +15,11 @@ export const enum LAYERS {
     UI =  100
 }
 
+export const enum MoveType {
+    MOVE,
+    ATTACK
+}
+
 export const enum PLAYERS {
     BLUE = 0,
     RED = 1
