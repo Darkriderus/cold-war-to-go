@@ -3,12 +3,14 @@
     {
       "name": "MBT",
       "movementPerTick": 10,
+      "health": 10,
       "playerId": 0,
       "texture": "tank"
     },
     {
       "name": "APC",
       "movementPerTick": 10,
+      "health": 5,
       "playerId": 0,
       "texture": "apc"
     },
@@ -17,12 +19,14 @@
     {
       "name": "MBT",
       "movementPerTick": 10,
+      "health": 10,
       "playerId": 1,
       "texture": "tank"
     },
     {
       "name": "APC",
       "movementPerTick": 10,
+      "health": 5,
       "playerId": 1,
       "texture": "apc"
     }

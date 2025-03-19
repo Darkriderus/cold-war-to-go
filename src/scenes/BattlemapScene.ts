@@ -73,7 +73,7 @@ class BattlemapScene extends Phaser.Scene {
         unitList.units.forEach((unitToLoad, i: number) => {
             const x = DBG_OFFSET + DBG_GAP_BETWEEN_UNITS + (i * DBG_GAP_BETWEEN_UNITS) + (i * DBG_GAP_BETWEEN_UNITS)
             const y = unitToLoad.playerId === PLAYERS.BLUE ? DBG_GAP_BETWEEN_UNITS : SMALL_MAP_PIXELSIZE_HEIGHT - DBG_GAP_BETWEEN_UNITS
-            const unit = new Unit(this, x, y, unitToLoad.texture, { movementPerTick: unitToLoad.movementPerTick, playerId: unitToLoad.playerId, name: unitToLoad.name });
+            const unit = new Unit(this, x, y, unitToLoad.texture, unitToLoad);
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
                 unit.select()
@@ -91,28 +91,24 @@ class BattlemapScene extends Phaser.Scene {
         });
 
 
-        // DRAG LOGIC START - To be modularized
-        {
-            this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
-            });
+        this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
+        });
 
-            this.input.on('drag', (_pointer: Phaser.Input.Pointer, ghost: Unit, dragX: number, dragY: number) => {
-                const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
+        this.input.on('drag', (_pointer: Phaser.Input.Pointer, ghost: Unit, dragX: number, dragY: number) => {
+            const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
 
-                ghost.setPosition(dragX, dragY);
-                this.drawDragLine(connectedUnit)
-            });
-            this.input.on('dragend', (_pointer: Phaser.Input.Pointer, ghost: Unit) => {
-                const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
+            ghost.setPosition(dragX, dragY);
+            this.drawDragLine(connectedUnit)
+        });
+        this.input.on('dragend', (_pointer: Phaser.Input.Pointer, ghost: Unit) => {
+            const connectedUnit = this.combatLogic.units[PLAYERS.BLUE].filter(unit => unit.ghost === ghost)[0]
 
-                if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
-                connectedUnit.currentOrder.movementToX = ghost.x;
-                connectedUnit.currentOrder.movementToY = ghost.y;
-                connectedUnit.currentOrder.movementType = battleUiScene.selectedOrderType;
+            if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
+            connectedUnit.currentOrder.movementToX = ghost.x;
+            connectedUnit.currentOrder.movementToY = ghost.y;
+            connectedUnit.currentOrder.movementType = battleUiScene.selectedOrderType;
 
-            });    
-        }
-        // DRAG LOGIC END
+        });    
     }
 }
 

@@ -38,21 +38,21 @@ export default class CombatLogic {
 
     calculateRound() { 
         return new Promise((resolve) => {
-                let tick = 0
-                this.battleMapScene!.time.addEvent({
-                    delay: MIN_SECS_PER_TICK * 1000,
-                    callback: () => {
-                        this.handleTick(tick);
-                        tick += 1
-                        if (tick >= TICK_PER_ROUND) {
-                            resolve(true)
-                        }
-                    },
-                    callbackScope: this,
-                    repeat: TICK_PER_ROUND - 1
-                });
+            let tick = 0
+            this.battleMapScene!.time.addEvent({
+                delay: MIN_SECS_PER_TICK * 1000,
+                callback: () => {
+                    this.handleTick(tick);
+                    tick += 1
+                    if (tick >= TICK_PER_ROUND) {
+                        resolve(true)
+                    }
+                },
+                callbackScope: this,
+                repeat: TICK_PER_ROUND - 1
             });
-        }
+        });
+    }
 
 
 
@@ -70,8 +70,7 @@ export default class CombatLogic {
                 const newX = unit.x + Math.cos(angle) * unit.movementPerTick;
                 const newY = unit.y + Math.sin(angle) * unit.movementPerTick;
 
-                unit.x = newX
-                unit.y = newY
+                unit.move(newX, newY)
             }
         })
     }

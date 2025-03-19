@@ -5,6 +5,7 @@ type IUnit = {
     movementPerTick: number;
     playerId: number;
     name: string;
+    health: number;
 }
 
 type Order = {
@@ -17,13 +18,13 @@ type Order = {
 export default class Unit extends Phaser.GameObjects.Sprite {
     public movementPerTick: number;
     public playerId: number;
+    public maxHealth: number;
+    public health: number;
+    
     public selected: boolean = false;
-    public initialX: number;
-    public initialY: number;
-
     public currentOrder: Order | null = null
-
     public ghost: Phaser.GameObjects.Sprite;
+    public healthLabel: Phaser.GameObjects.Text;
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
         const colorSuffix = unitInfo.playerId === PLAYERS.BLUE ? '_blue' : '_red';
@@ -31,15 +32,14 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
         this.movementPerTick = unitInfo.movementPerTick;
         this.playerId = unitInfo.playerId;
-
-        this.initialX = x;
-        this.initialY = y;
+        this.health = unitInfo.health;
+        this.maxHealth = unitInfo.health;
 
         // this.setInteractive({ draggable: true })
         this.setDepth(LAYERS.UNITS)
-        this.setTint(0x808080);
-        this.setOrigin(0, 0)
-        this.setDisplaySize(TOKEN_SIZE, TOKEN_SIZE)
+            .setTint(0x808080)
+            .setOrigin(0, 0)
+            .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE)
         scene.add.existing(this);
 
         this.ghost = scene.add.sprite(x, y, this.texture)
@@ -48,6 +48,18 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setInteractive({ draggable: true })
             .setOrigin(0, 0)
             .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE);
+
+        this.healthLabel = scene.add.text(x, y + (TOKEN_SIZE),`(${this.health}/${this.maxHealth})`)
+            .setFontSize(12)
+            .setDepth(LAYERS.UNITS)
+            .setBackgroundColor("grey").setOrigin(0, 0);
+    }
+
+    move(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+        this.healthLabel.x = x;
+        this.healthLabel.y = y + (TOKEN_SIZE);
     }
 
     select() {
