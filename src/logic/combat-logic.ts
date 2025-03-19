@@ -12,6 +12,11 @@ export default class CombatLogic {
         this.battleMapScene = battleMapScene
     }
 
+    get allUnits(): Unit[] {
+        return this.units[PLAYERS.BLUE].concat(this.units[PLAYERS.RED])
+    }
+
+
     lockUnits(playerId : PLAYERS) {
         this.units[playerId].forEach(unit => {
             unit.disableInteractive()
