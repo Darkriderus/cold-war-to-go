@@ -68,10 +68,14 @@ export default class CombatLogic {
     handleTick(tick: number): void {    
         console.log("-- Tick " + tick + " --")
         this.units.forEach((playerUnits, playerId) => {
-            const enemyUnits = this.units[playerId === PLAYERS.BLUE ? PLAYERS.RED : PLAYERS.BLUE]
+            const enemyAliveUnits = this.units[playerId === PLAYERS.BLUE ? PLAYERS.RED : PLAYERS.BLUE].filter(unit => unit.health > 0);
 
             playerUnits.forEach(unit => {
                 console.log(`[${unit.playerId === PLAYERS.BLUE ? 'Blue' : 'Red'}] unit ${unit.name}..`);
+                if (unit.health <= 0) {
+                    console.log("   >dead");
+                    return
+                }
                 if (unit.currentOrder === null) {
                     console.log("   >no order");
                 } else {
@@ -98,7 +102,7 @@ export default class CombatLogic {
                 }
         
                 // SHOOT
-                const targetsInRange = enemyUnits.map(enemyUnit => {
+                const targetsInRange = enemyAliveUnits.map(enemyUnit => {
                     const distance = Phaser.Math.Distance.Between(unit.x, unit.y, enemyUnit.x, enemyUnit.y);
                     return { unit: enemyUnit, distance }
                 }).filter(target => target.distance <= unit.range);
