@@ -1,8 +1,9 @@
-import { PLAYER_COLOR, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TOKEN_SIZE } from "../helper/constants"
+import { PLAYER_COLOR, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TerrainType, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
 import unitList from "../../public/dummy/dummy_oob.json"
 import CombatLogic from "../logic/combat-logic"
 import BattleUI from "./BattleUI"
+import { Terrain } from "../objects/terrain"
 
 // TODO/IDEAS
 // FFT-Values with 10x Health
@@ -16,6 +17,7 @@ class BattlemapScene extends Phaser.Scene {
     private deployZoneGraphics: Phaser.GameObjects.Graphics | undefined;
 
     public combatLogic: CombatLogic;
+    public terrains: Terrain[] = []
 
     public mapConfig = {
         width: SMALL_MAP_PIXELSIZE_WIDTH,
@@ -28,7 +30,48 @@ class BattlemapScene extends Phaser.Scene {
         redDeploy: {
             x1: SMALL_MAP_PIXELSIZE_WIDTH * 0.09, y1: SMALL_MAP_PIXELSIZE_HEIGHT * 0.65,
             x2: SMALL_MAP_PIXELSIZE_WIDTH * 0.5, y2: SMALL_MAP_PIXELSIZE_HEIGHT * 0.9,
-        }
+        },
+        terrain: [
+            {
+                scene: this, 
+                points: [
+                    443,485,
+                    420,523,
+                    422,549,
+                    445,553,
+                    460,538,
+                    461,504,
+                    452,492
+                ], 
+                moveModifier: 0, 
+                blocksLOS: true,
+                showTerrain: true,
+                type: TerrainType.WATER
+            },
+            {
+                scene: this,
+                points: [
+                    391,739
+                    ,391,714
+                    ,381,672
+                    ,379,631
+                    ,393,590
+                    ,393,551
+                    ,379,533
+                    ,388,528
+                    ,408,574
+                    ,396,617
+                    ,391,642
+                    ,398,687
+                    ,401,732
+                    ,390,744
+                ],
+                moveModifier: 1.5, 
+                blocksLOS: false,
+                showTerrain: true,
+                type: TerrainType.ROAD
+            }
+        ],
     }
 
     constructor() {
@@ -96,6 +139,12 @@ class BattlemapScene extends Phaser.Scene {
         })
     }
 
+    generateTerrain() {
+        this.mapConfig.terrain.forEach((terrainElement) => {
+            this.terrains.push(new Terrain(terrainElement));
+        })
+    }
+
     preload() {
         this.load.image('bg', 'public/sprites/Testmap.png');
         this.load.image('tank_red', 'public/sprites/units/tank_red.svg');
@@ -113,12 +162,14 @@ class BattlemapScene extends Phaser.Scene {
         
         this.deployZoneGraphics = this.add.graphics();
         this.drawDeployZones();
+        this.generateTerrain();
+        this.terrains.push(new Terrain(this.mapConfig.terrain[0]));
 
 
         this.deployUnits(PLAYERS.BLUE);
         this.deployUnits(PLAYERS.RED);
-        this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
-            console.log("COORD", _pointer.x, _pointer.y);
+        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
+            console.log("Map Clicked", pointer.x, pointer.y);
             if (gameObjects.length === 0) {
                 this.deselectAll()
                 this.clearRangeCircles()
@@ -143,12 +194,26 @@ class BattlemapScene extends Phaser.Scene {
                 connectedUnit.moveGhost(dragX, dragY);
             }
 
-           
-            
+            for (const terrain of this.terrains) {
+                if (terrain.intersects(connectedUnit.ghost) && !terrain.canMoveInto(connectedUnit)) {
+                    connectedUnit.ghost.setAlpha(0.2);
+                }
+            }
+
         });
-        this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
+        this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite) => {
             const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);        
             const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
+
+            for (const terrain of this.terrains) {
+                if (terrain.intersects(connectedUnit.ghost) && !terrain.canMoveInto(connectedUnit)) {
+                    connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
+                    return;
+                }
+            }
+            
+
+
 
             if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
             connectedUnit.currentOrder.movementToX = connectedUnit.ghost.x;

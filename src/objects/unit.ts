@@ -44,7 +44,6 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.range = unitInfo.range;
         this.name = unitInfo.name;
 
-        // this.setInteractive({ draggable: true })
         this.setDepth(LAYERS.UNITS)
             .setTint(0x808080)
             .setOrigin(0, 0)
