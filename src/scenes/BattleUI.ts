@@ -1,4 +1,4 @@
-import { LAYERS, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT } from "../helper/constants";
+import { LAYERS, SMALL_MAP_PIXELSIZE_HEIGHT } from "../helper/constants";
 import BattlemapScene from "./BattlemapScene";
 
 class BattleUI extends Phaser.Scene {
@@ -10,8 +10,6 @@ class BattleUI extends Phaser.Scene {
         this.load.image('move-icon', 'public/sprites/icons/move.svg');       
         this.load.image('shoot-icon', 'public/sprites/icons/shoot.svg');    
         this.load.image('next-turn-icon', 'public/sprites/icons/next-turn.svg');       
-   
-
     }
 
     create() {
@@ -59,11 +57,10 @@ class BattleUI extends Phaser.Scene {
                 nextTurnButton.clearTint();
             })
             .on('pointerdown', () => {
-                console.log('Button Clicked!');
-
                 battlemapScene.deselectAll();
-                battlemapScene.combatLogic.acceptOrders()
-
+                battlemapScene.clearDragLine();
+                battlemapScene.clearMovementRange();
+                battlemapScene.combatLogic.acceptOrders(battlemapScene)
             })
         
     }

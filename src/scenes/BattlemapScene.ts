@@ -67,7 +67,6 @@ class BattlemapScene extends Phaser.Scene {
                 unit.select()
 
                 this.drawDragLine(unit)
-                this.drawMovementRange(unit)
             });
             this.combatLogic.units[PLAYERS.BLUE].push(unit)
         })
@@ -93,18 +92,11 @@ class BattlemapScene extends Phaser.Scene {
             this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Unit, dragX: number, dragY: number) => {
                 sprite.setPosition(dragX, dragY);
                 this.drawDragLine(sprite)
-                this.drawMovementRange(sprite)
             });
             this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Unit) => {
-                let distance = Phaser.Math.Distance.Between(sprite.ghost.x, sprite.ghost.y, sprite.x, sprite.y);
-
-                if (distance > sprite.speed) {
-                    console.log("Too far!", distance, ">", sprite.speed);
-                    sprite.setPosition(sprite.ghost.x, sprite.ghost.y);
-
-                    this.clearDragLine()                    
-                    this.drawMovementRange(sprite)
-                }
+                if (!sprite.currentOrder) sprite.currentOrder = {};
+                sprite.currentOrder.targetX = sprite.x;
+                sprite.currentOrder.targetY = sprite.y;
             });
         }
         // DRAG LOGIC END

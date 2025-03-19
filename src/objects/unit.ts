@@ -7,6 +7,12 @@ type IUnit = {
     name: string;
 }
 
+type Order = {
+    targetX?: number;
+    targetY?: number;
+    targetUnit?: Unit;
+}
+
 export default class Unit extends Phaser.GameObjects.Sprite {
     public speed: number;
     public playerId: number;
@@ -15,15 +21,17 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     public initialX: number;
     public initialY: number;
 
+    public currentOrder: Order | null = null
+
     public ghost: Phaser.GameObjects.Sprite;
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
         super(scene, x, y, texture);
-        this.initialX = x;
-        this.initialY = y;
         this.speed = unitInfo.speed;
         this.playerId = unitInfo.playerId;
         this.baseTexture = texture;
+        this.initialX = x;
+        this.initialY = y;
 
         this.setInteractive({ draggable: true })
         this.setDepth(LAYERS.UNITS)
@@ -41,8 +49,5 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     deselect() {
         this.selected = false;
         this.setTint(0x808080);
-
-        // this.setTexture(this.baseTexture);
-
     }
 }
