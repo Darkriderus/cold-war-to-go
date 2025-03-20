@@ -1,4 +1,4 @@
-import { PLAYER_COLOR, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TerrainType, TOKEN_SIZE } from "../helper/constants"
+import { PlayerColor, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team, TerrainType, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
 // import unitList from "../../public/dummy/dummy_oob.json"
 import unitList from "../../public/dummy/dummy_oob_v2.json"
@@ -135,13 +135,13 @@ class BattlemapScene extends Phaser.Scene {
 
     drawDeployZones() {
         this.deployZoneGraphics?.clear();
-        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.BLUE, 0.15);
+        this.deployZoneGraphics?.fillStyle(PlayerColor.BLUE, 0.15);
         this.deployZoneGraphics?.fillRect(
             this.mapConfig.blueDeploy.x1,
             this.mapConfig.blueDeploy.y1,
             this.mapConfig.blueDeploy.x2 - this.mapConfig.blueDeploy.x1,
             this.mapConfig.blueDeploy.y2 - this.mapConfig.blueDeploy.y1);
-        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.RED, 0.15);
+        this.deployZoneGraphics?.fillStyle(PlayerColor.RED, 0.15);
         this.deployZoneGraphics?.fillRect(
             this.mapConfig.redDeploy.x1,
             this.mapConfig.redDeploy.y1,
@@ -149,12 +149,12 @@ class BattlemapScene extends Phaser.Scene {
             this.mapConfig.redDeploy.y2 - this.mapConfig.redDeploy.y1);
     }
 
-    deployUnits(playerTeam: PLAYERS) {
+    deployUnits(playerTeam: Team) {
         const battleUiScene = this.scene.get('BattleUI') as BattleUI;
 
         unitList.units.filter(unit => unit.playerId === playerTeam).forEach((unitToLoad, idx) => {
-            const leftEdge = playerTeam === PLAYERS.BLUE ? this.mapConfig.blueDeploy.x1 + DBG_OFFSET : this.mapConfig.redDeploy.x1 + DBG_OFFSET;
-            const topEdge = playerTeam === PLAYERS.BLUE ? this.mapConfig.blueDeploy.y1 + DBG_OFFSET : this.mapConfig.redDeploy.y1 + DBG_OFFSET
+            const leftEdge = playerTeam === Team.BLUE ? this.mapConfig.blueDeploy.x1 + DBG_OFFSET : this.mapConfig.redDeploy.x1 + DBG_OFFSET;
+            const topEdge = playerTeam === Team.BLUE ? this.mapConfig.blueDeploy.y1 + DBG_OFFSET : this.mapConfig.redDeploy.y1 + DBG_OFFSET
 
             const unit = new Unit(this, (leftEdge + (idx * DBG_GAP_BETWEEN_UNITS)), topEdge, unitToLoad.texture, unitToLoad);
             unit.on('pointerdown', () => {
@@ -204,8 +204,8 @@ class BattlemapScene extends Phaser.Scene {
         this.terrains.push(new Terrain(this.mapConfig.terrain[0]));
 
 
-        this.deployUnits(PLAYERS.BLUE);
-        this.deployUnits(PLAYERS.RED);
+        this.deployUnits(Team.BLUE);
+        this.deployUnits(Team.RED);
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
             console.log(pointer.x + "," + pointer.y + ",");
             if (gameObjects.length === 0) {

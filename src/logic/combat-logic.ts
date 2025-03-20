@@ -1,4 +1,4 @@
-import { MIN_SECS_PER_TICK, PLAYERS, TICK_PER_ROUND } from "../helper/constants";
+import { MIN_SECS_PER_TICK, Team, TICK_PER_ROUND } from "../helper/constants";
 import Unit from "../objects/unit";
 import BattlemapScene from "../scenes/BattlemapScene";
 
@@ -7,45 +7,45 @@ export default class CombatLogic {
     private battleMapScene?: BattlemapScene
 
     initialize(battleMapScene: BattlemapScene): void {
-        this.units[PLAYERS.BLUE] = []
-        this.units[PLAYERS.RED] = []
+        this.units[Team.BLUE] = []
+        this.units[Team.RED] = []
         this.battleMapScene = battleMapScene
     }
 
     get allUnits(): Unit[] {
-        return this.units[PLAYERS.BLUE].concat(this.units[PLAYERS.RED])
+        return this.units[Team.BLUE].concat(this.units[Team.RED])
     }
 
 
-    lockUnits(playerId : PLAYERS) {
+    lockUnits(playerId: Team) {
         this.units[playerId].forEach(unit => {
             unit.disableInteractive()
             unit.ghost.disableInteractive()
         });
     }
 
-    unlockUnits(playerId : PLAYERS) {
+    unlockUnits(playerId: Team) {
         this.units[playerId].forEach(unit => {
-                unit.setInteractive({ draggable: false });
-                unit.ghost.setInteractive({ draggable: unit.alive });
+            unit.setInteractive({ draggable: false });
+            unit.ghost.setInteractive({ draggable: unit.isAlive });
         });
     }
 
-    async acceptOrders() { 
+    async acceptOrders() {
         console.log("-- Order Accepted, Starting Round --")
-        this.lockUnits(PLAYERS.BLUE)
-        this.lockUnits(PLAYERS.RED)
+        this.lockUnits(Team.BLUE)
+        this.lockUnits(Team.RED)
 
 
         await this.calculateRound();
-        
-        this.unlockUnits(PLAYERS.BLUE)
-        this.unlockUnits(PLAYERS.RED)
+
+        this.unlockUnits(Team.BLUE)
+        this.unlockUnits(Team.RED)
 
         console.log("-- Round Done! --")
     }
 
-    calculateRound() { 
+    calculateRound() {
         return new Promise((resolve) => {
             let tick = 0
             this.battleMapScene!.time.addEvent({
@@ -65,14 +65,14 @@ export default class CombatLogic {
 
 
 
-    handleTick(tick: number): void {    
+    handleTick(tick: number): void {
         console.log("-- Tick " + tick + " --")
         this.units.forEach((playerUnits, playerId) => {
-            const enemyAliveUnits = this.units[playerId === PLAYERS.BLUE ? PLAYERS.RED : PLAYERS.BLUE].filter(unit => unit.health > 0);
+            const enemyAliveUnits = this.units[playerId === Team.BLUE ? Team.RED : Team.BLUE].filter(unit => unit.health > 0);
 
             playerUnits.forEach(unit => {
                 console.log("-------------");
-                console.log(`[${unit.playerId === PLAYERS.BLUE ? 'Blue' : 'Red'}] unit ${unit.name}..`);
+                console.log(`[${unit.playerId === Team.BLUE ? 'Blue' : 'Red'}] unit ${unit.name}..`);
                 if (unit.health <= 0) {
                     console.log("   >dead");
                     return
@@ -97,12 +97,12 @@ export default class CombatLogic {
                         const angle = Phaser.Math.Angle.Between(unit.x, unit.y, unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!);
                         const newX = unit.x + Math.cos(angle) * terrainModifiedDistance;
                         const newY = unit.y + Math.sin(angle) * terrainModifiedDistance;
-        
+
                         unit.move(newX, newY)
                         console.log("   >move (" + terrainModifiedDistance + ")");
                     }
                 }
-        
+
                 // SHOOT
                 const targetsInRange = enemyAliveUnits.map(enemyUnit => {
                     const distance = Phaser.Math.Distance.Between(unit.center.x, unit.center.y, enemyUnit.center.x, enemyUnit.center.y);
@@ -119,7 +119,7 @@ export default class CombatLogic {
                 unit.hitGraphics.clear();
             })
         })
-        
+
     }
 
 

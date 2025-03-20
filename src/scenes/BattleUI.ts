@@ -1,4 +1,4 @@
-import { LAYERS, MoveType, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from "../helper/constants";
+import { Layer, MoveType, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team } from "../helper/constants";
 import Unit from "../objects/unit";
 import BattlemapScene from "./BattlemapScene";
 
@@ -25,33 +25,33 @@ class BattleUI extends Phaser.Scene {
     showUnitInfo(unit?: Unit) {
         let labelColor = "white";
         if (unit) {
-            labelColor = `${unit.playerTeam === PLAYERS.BLUE ? 'Blue' : 'Red'}`
-            if (!unit.alive){
+            labelColor = `${unit.playerTeam === Team.BLUE ? 'Blue' : 'Red'}`
+            if (!unit.isAlive) {
                 labelColor = 'black'
             }
             console.log(unit.playerColor)
         }
 
         let teamLabel = 'Team: '
-        if (unit){
-            teamLabel = `${teamLabel}${unit.playerTeam === PLAYERS.BLUE ? 'Blue' : 'Red'}`
+        if (unit) {
+            teamLabel = `${teamLabel}${unit.playerTeam === Team.BLUE ? 'Blue' : 'Red'}`
         }
         this.teamText?.setText(teamLabel).setColor(labelColor);
 
         let nameLabel = 'Name: '
-        if (unit){
+        if (unit) {
             nameLabel = `${nameLabel}${unit.name}`
         }
         this.nameText?.setText(nameLabel).setColor(labelColor);
 
         let healthLabel = 'Health: '
-        if (unit){
+        if (unit) {
             healthLabel = `${healthLabel}${unit.health} / ${unit.maxHealth}`
         }
         this.healthText?.setText(healthLabel).setColor(labelColor);
 
         let rangeLabel = 'Range: '
-        if (unit){
+        if (unit) {
             rangeLabel = `${rangeLabel}${unit.range}`
         }
         this.rangeText?.setText(rangeLabel).setColor(labelColor);
@@ -59,9 +59,9 @@ class BattleUI extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('move-icon', 'public/sprites/icons/move.svg');       
-        this.load.image('shoot-icon', 'public/sprites/icons/shoot.svg');    
-        this.load.image('next-turn-icon', 'public/sprites/icons/next-turn.svg');       
+        this.load.image('move-icon', 'public/sprites/icons/move.svg');
+        this.load.image('shoot-icon', 'public/sprites/icons/shoot.svg');
+        this.load.image('next-turn-icon', 'public/sprites/icons/next-turn.svg');
     }
 
     create() {
@@ -70,29 +70,29 @@ class BattleUI extends Phaser.Scene {
         this.add.rectangle(0, 0, 80, SMALL_MAP_PIXELSIZE_HEIGHT, 0x000000)
             .setAlpha(0.6)
             .setOrigin(0, 0)
-            .setDepth(LAYERS.UI);
+            .setDepth(Layer.UI);
         this.add.rectangle(0, SMALL_MAP_PIXELSIZE_HEIGHT - 100, SMALL_MAP_PIXELSIZE_WIDTH, 100, 0xFFFFFFF)
             .setAlpha(0.3)
             .setOrigin(0, 0)
-            .setDepth(LAYERS.UI);
+            .setDepth(Layer.UI);
 
         this.teamText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 90, 'Team:')
             .setColor('white')
-            .setDepth(LAYERS.UI);
+            .setDepth(Layer.UI);
         this.nameText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 70, 'Name:')
             .setColor('white')
-            .setDepth(LAYERS.UI);
+            .setDepth(Layer.UI);
         this.healthText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 50, 'Health:')
             .setColor('white')
-            .setDepth(LAYERS.UI);
+            .setDepth(Layer.UI);
         this.rangeText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 30, 'Range:')
             .setColor('white')
-            .setDepth(LAYERS.UI);
+            .setDepth(Layer.UI);
 
 
 
         this.moveButton = this.add.sprite(40, 50, 'move-icon')
-            .setDepth(LAYERS.UI)
+            .setDepth(Layer.UI)
             .setDisplaySize(50, 50)
             .setInteractive()
             .on('pointerover', () => {
@@ -104,7 +104,7 @@ class BattleUI extends Phaser.Scene {
                 this.shootButtonSelected = false
 
                 this.selectedOrderType = MoveType.MOVE
-                
+
                 this.moveButton?.setTint(this.SELECTED_TINT);
                 this.shootButton?.clearTint();
             })
@@ -113,7 +113,7 @@ class BattleUI extends Phaser.Scene {
         }
 
         this.shootButton = this.add.sprite(40, 150, 'shoot-icon')
-            .setDepth(LAYERS.UI)
+            .setDepth(Layer.UI)
             .setDisplaySize(50, 50)
             .setInteractive()
             .on('pointerover', () => {
@@ -129,12 +129,12 @@ class BattleUI extends Phaser.Scene {
                 this.shootButton?.setTint(this.SELECTED_TINT);
                 this.moveButton?.clearTint();
             })
-            if (this.shootButtonSelected) {
-                this.shootButton.setTint(this.SELECTED_TINT);
-            }
+        if (this.shootButtonSelected) {
+            this.shootButton.setTint(this.SELECTED_TINT);
+        }
 
         let nextTurnButton = this.add.sprite(40, SMALL_MAP_PIXELSIZE_HEIGHT - 50, 'next-turn-icon')
-            .setDepth(LAYERS.UI)
+            .setDepth(Layer.UI)
             .setDisplaySize(50, 50)
             .setInteractive()
             .on('pointerover', () => {
@@ -147,7 +147,7 @@ class BattleUI extends Phaser.Scene {
                 battlemapScene.clearAllRangeCircles();
                 battlemapScene.combatLogic.acceptOrders()
             })
-        
+
     }
 }
 

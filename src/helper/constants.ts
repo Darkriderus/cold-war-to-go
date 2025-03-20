@@ -6,16 +6,16 @@ export const SMALL_MAP_PIXELSIZE_HEIGHT = 900
 export const TICK_PER_ROUND = 15
 export const MIN_SECS_PER_TICK = 1
 
-export const enum LAYERS {
+export enum Layer {
     BACKGROUND = 0,
     MOVEMENT_LINES = 5,
     UNITS = 10,
     GHOSTS = 20,
     LINES = 30,
-    UI =  100
+    UI = 100
 }
 
-export const enum MoveType {
+export enum MoveType {
     MOVE,
     ATTACK
 }
@@ -27,12 +27,12 @@ export enum TerrainType {
     WOODS
 }
 
-export const enum PLAYERS {
+export enum Team {
     BLUE = 0,
     RED = 1
 }
 
-export const enum PLAYER_COLOR {
+export enum PlayerColor {
     BLUE = 0x0000FF,
     RED = 0xFF0000
 }

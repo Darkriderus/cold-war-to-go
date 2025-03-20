@@ -1,4 +1,4 @@
-import { LAYERS, TerrainType } from "../helper/constants"
+import { Layer, TerrainType } from "../helper/constants"
 import Unit from "./unit"
 
 type ITerrain = {
@@ -31,7 +31,7 @@ export class Terrain extends Phaser.Geom.Polygon {
         this.scene = terrainData.scene
         this.graphics = this.scene.add.graphics();
 
-        this.graphics.setDepth(LAYERS.UI);
+        this.graphics.setDepth(Layer.UI);
         this.graphics.fillStyle(this.color, this.showTerrain ? 0.4 : 0);
         this.graphics.fillPoints(this.points, true);
     }
