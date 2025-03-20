@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Layer, OrderType, Team, TOKEN_SIZE } from '../helper/constants';
+import { Layer, OrderType, PlayerColor, Team, TOKEN_SIZE } from '../helper/constants';
 import BattlemapScene from '../scenes/BattlemapScene';
 
 type IUnit = {
@@ -107,7 +107,6 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.name = unitInfo.name;
 
         this.setDepth(Layer.UNITS)
-            .setTint(0x808080)
             .setOrigin(0, 0)
             .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE)
             .setInteractive({ draggable: true });
@@ -136,7 +135,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
 
     get playerColor() {
-        return this.playerId === Team.BLUE ? Team.BLUE : Team.RED;
+        return this.playerId === Team.BLUE ? PlayerColor.BLUE : PlayerColor.RED;
     }
 
     get playerTeam() {
@@ -215,6 +214,16 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.healthLabel.text = `(${this.health}/${this.maxHealth})`
     }
 
+    selectEffect() {
+        let flashTimes = 3;
+        let delay = 100;
+
+        for (let i = 0; i < flashTimes; i++) {
+            this.scene.time.delayedCall(i * delay * 2, () => this.setVisible(false));
+            this.scene.time.delayedCall(i * delay * 2 + delay, () => this.setVisible(true));
+        }
+    }
+
     hitEffect() {
         let flashTimes = 3;
         let delay = 100;
@@ -268,11 +277,10 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     select() {
         this.selected = true;
-        this.clearTint();
+        this.selectEffect()
     }
 
     deselect() {
         this.selected = false;
-        this.setTint(0x808080);
     }
 }

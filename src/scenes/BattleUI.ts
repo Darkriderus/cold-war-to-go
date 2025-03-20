@@ -29,7 +29,6 @@ class BattleUI extends Phaser.Scene {
             if (!unit.isAlive) {
                 labelColor = 'black'
             }
-            console.log(unit.playerColor)
         }
 
         let teamLabel = 'Team: '

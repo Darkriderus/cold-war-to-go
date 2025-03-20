@@ -8,9 +8,8 @@ import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
 
 // TODO/IDEAS
+// Icons as Class with Rectangle and Icon
 // Move with D&D, Buttons for Targets as if dragged
-// Camera sliding 
-// First Real Map with Terrain
 // OOB with FFT-Values
 
 const DBG_GAP_BETWEEN_UNITS = 50
@@ -130,9 +129,6 @@ class BattlemapScene extends Phaser.Scene {
         this.deployUnits(Team.RED);
         let points: number[] = []
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
-            points.push(pointer.x, pointer.y);
-            console.log(points.join(','));
-
             if (gameObjects.length === 0) {
                 this.deselectAll()
                 battleUiScene.showUnitInfo();
