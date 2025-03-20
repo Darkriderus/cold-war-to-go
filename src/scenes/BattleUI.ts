@@ -1,4 +1,4 @@
-import { Layer, MoveType, OrderType, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team } from "../helper/constants";
+import { Layer, OrderType, Team } from "../helper/constants";
 import Unit from "../objects/unit";
 import BattlemapScene from "./BattlemapScene";
 
@@ -65,27 +65,30 @@ class BattleUI extends Phaser.Scene {
     }
 
     create() {
+        const gameWidth = this.game.config.width as number;
+        const gameHeight = this.game.config.height as number;
+
         const battlemapScene = this.scene.get('BattleMap') as BattlemapScene;
 
-        this.add.rectangle(0, 0, 80, SMALL_MAP_PIXELSIZE_HEIGHT, 0x000000)
+        this.add.rectangle(0, 0, 80, gameHeight, 0x000000)
             .setAlpha(0.6)
             .setOrigin(0, 0)
             .setDepth(Layer.UI);
-        this.add.rectangle(0, SMALL_MAP_PIXELSIZE_HEIGHT - 100, SMALL_MAP_PIXELSIZE_WIDTH, 100, 0xFFFFFFF)
+        this.add.rectangle(0, gameHeight - 100, gameWidth, 100, 0xFFFFFFF)
             .setAlpha(0.3)
             .setOrigin(0, 0)
             .setDepth(Layer.UI);
 
-        this.teamText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 90, 'Team:')
+        this.teamText = this.add.text(100, gameHeight - 90, 'Team:')
             .setColor('white')
             .setDepth(Layer.UI);
-        this.nameText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 70, 'Name:')
+        this.nameText = this.add.text(100, gameHeight - 70, 'Name:')
             .setColor('white')
             .setDepth(Layer.UI);
-        this.healthText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 50, 'Health:')
+        this.healthText = this.add.text(100, gameHeight - 50, 'Health:')
             .setColor('white')
             .setDepth(Layer.UI);
-        this.rangeText = this.add.text(100, SMALL_MAP_PIXELSIZE_HEIGHT - 30, 'Range:')
+        this.rangeText = this.add.text(100, gameHeight - 30, 'Range:')
             .setColor('white')
             .setDepth(Layer.UI);
 
@@ -133,7 +136,7 @@ class BattleUI extends Phaser.Scene {
             this.shootButton.setTint(this.SELECTED_TINT);
         }
 
-        let nextTurnButton = this.add.sprite(40, SMALL_MAP_PIXELSIZE_HEIGHT - 50, 'next-turn-icon')
+        let nextTurnButton = this.add.sprite(40, gameHeight - 50, 'next-turn-icon')
             .setDepth(Layer.UI)
             .setDisplaySize(50, 50)
             .setInteractive()

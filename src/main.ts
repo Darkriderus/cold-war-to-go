@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 
 import BattlemapScene from './scenes/BattlemapScene'
-import { SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH } from './helper/constants'
 import BattleUI from './scenes/BattleUI'
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -9,9 +8,8 @@ const config: Phaser.Types.Core.GameConfig = {
 	parent: 'app',
 	scale: {
 		autoCenter: Phaser.Scale.CENTER_BOTH,
-		width: SMALL_MAP_PIXELSIZE_WIDTH,
-		height: SMALL_MAP_PIXELSIZE_HEIGHT,
-		zoom: 1
+		width: 1200,
+		height: 800,
 	},
 	physics: {
 		default: 'arcade',

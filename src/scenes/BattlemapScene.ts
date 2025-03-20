@@ -216,8 +216,7 @@ class BattlemapScene extends Phaser.Scene {
 
         this.cursors = this.input.keyboard?.createCursorKeys();
 
-
-        this.add.image(this.mapConfig.width / 2, this.mapConfig.height / 2, 'bg').setDisplaySize(this.mapConfig.width, this.mapConfig.height);
+        this.add.image(0, 0, 'bg').setOrigin(0, 0).setDisplaySize(this.mapConfig.width, this.mapConfig.height);
 
         this.deployZoneGraphics = this.add.graphics();
         this.drawDeployZones();
@@ -283,17 +282,15 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     update() {
-        // Optional: Kamera mit Tastatur steuern
         if (this.cursors?.left.isDown) {
-            this.cameras.main.scrollX -= this.cameraSpeed;
+            this.cameras.main.scrollX = Math.max(0, this.cameras.main.scrollX - this.cameraSpeed);
         } else if (this.cursors?.right.isDown) {
-            this.cameras.main.scrollX += this.cameraSpeed;
+            this.cameras.main.scrollX = Math.min(SMALL_MAP_PIXELSIZE_WIDTH - 800, this.cameras.main.scrollX + this.cameraSpeed);
         }
-
         if (this.cursors?.up.isDown) {
-            this.cameras.main.scrollY -= this.cameraSpeed;
+            this.cameras.main.scrollY = Math.max(0, this.cameras.main.scrollY - this.cameraSpeed);
         } else if (this.cursors?.down.isDown) {
-            this.cameras.main.scrollY += this.cameraSpeed;
+            this.cameras.main.scrollY = Math.min(SMALL_MAP_PIXELSIZE_HEIGHT - 600, this.cameras.main.scrollY + this.cameraSpeed);
         }
     }
 }
