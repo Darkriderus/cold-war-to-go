@@ -23,6 +23,8 @@ class BattlemapScene extends Phaser.Scene {
     public combatLogic: CombatLogic;
     public terrains: Terrain[] = []
 
+    private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
+    private cameraSpeed: number = 10;
 
     // ToDo - Move to config
     public mapConfig = {
@@ -207,6 +209,13 @@ class BattlemapScene extends Phaser.Scene {
 
     create() {
         const battleUiScene = this.scene.get('BattleUI') as BattleUI;
+        this.input.on('wheel', (_pointer: any, _gameObjects: any, _deltaX: number, deltaY: number, _deltaZ: number) => {
+            this.cameras.main.zoom += deltaY * -0.001;
+            this.cameras.main.zoom = Phaser.Math.Clamp(this.cameras.main.zoom, 0.5, 2);
+        });
+
+        this.cursors = this.input.keyboard?.createCursorKeys();
+
 
         this.add.image(this.mapConfig.width / 2, this.mapConfig.height / 2, 'bg').setDisplaySize(this.mapConfig.width, this.mapConfig.height);
 
@@ -271,6 +280,21 @@ class BattlemapScene extends Phaser.Scene {
             connectedUnit.currentOrder.movementType = battleUiScene.selectedOrderType;
 
         });
+    }
+
+    update() {
+        // Optional: Kamera mit Tastatur steuern
+        if (this.cursors?.left.isDown) {
+            this.cameras.main.scrollX -= this.cameraSpeed;
+        } else if (this.cursors?.right.isDown) {
+            this.cameras.main.scrollX += this.cameraSpeed;
+        }
+
+        if (this.cursors?.up.isDown) {
+            this.cameras.main.scrollY -= this.cameraSpeed;
+        } else if (this.cursors?.down.isDown) {
+            this.cameras.main.scrollY += this.cameraSpeed;
+        }
     }
 }
 
