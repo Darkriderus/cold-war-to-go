@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Layer, MoveType, Team, TOKEN_SIZE } from '../helper/constants';
+import { Layer, OrderType, Team, TOKEN_SIZE } from '../helper/constants';
 import BattlemapScene from '../scenes/BattlemapScene';
 
 type IUnit = {
@@ -42,7 +42,7 @@ type Armor = {
 type Order = {
     movementToX?: number;
     movementToY?: number;
-    movementType?: MoveType;
+    movementType?: OrderType;
     targetUnit?: Unit;
 }
 

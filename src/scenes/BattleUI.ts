@@ -1,4 +1,4 @@
-import { Layer, MoveType, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team } from "../helper/constants";
+import { Layer, MoveType, OrderType, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team } from "../helper/constants";
 import Unit from "../objects/unit";
 import BattlemapScene from "./BattlemapScene";
 
@@ -16,7 +16,7 @@ class BattleUI extends Phaser.Scene {
     moveButtonSelected: boolean = true;
     shootButtonSelected: boolean = false;
 
-    public selectedOrderType: MoveType = MoveType.MOVE
+    public selectedOrderType: OrderType = OrderType.MOVE
 
     constructor() {
         super({ key: 'BattleUI', active: true });
@@ -103,7 +103,7 @@ class BattleUI extends Phaser.Scene {
                 this.moveButtonSelected = true
                 this.shootButtonSelected = false
 
-                this.selectedOrderType = MoveType.MOVE
+                this.selectedOrderType = OrderType.MOVE
 
                 this.moveButton?.setTint(this.SELECTED_TINT);
                 this.shootButton?.clearTint();
@@ -124,7 +124,7 @@ class BattleUI extends Phaser.Scene {
                 this.moveButtonSelected = false
                 this.shootButtonSelected = true
 
-                this.selectedOrderType = MoveType.ATTACK
+                this.selectedOrderType = OrderType.ATTACK
 
                 this.shootButton?.setTint(this.SELECTED_TINT);
                 this.moveButton?.clearTint();

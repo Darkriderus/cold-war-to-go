@@ -1,10 +1,12 @@
-export const TOKEN_SIZE = 30
+export const PIXEL_PER_KILOMETER = 100
+export const TOKEN_SIZE = PIXEL_PER_KILOMETER / 4
 
 export const SMALL_MAP_PIXELSIZE_WIDTH = 1200
 export const SMALL_MAP_PIXELSIZE_HEIGHT = 900
 
 export const TICK_PER_ROUND = 15
-export const MIN_SECS_PER_TICK = 1
+export const TICK_INTERVAL = 1
+
 
 export enum Layer {
     BACKGROUND = 0,
@@ -13,6 +15,14 @@ export enum Layer {
     GHOSTS = 20,
     LINES = 30,
     UI = 100
+}
+
+export enum OrderType {
+    MOVE,
+    RETREAT,
+    ADVANCE,
+    ATTACK,
+    DEFEND
 }
 
 export enum MoveType {

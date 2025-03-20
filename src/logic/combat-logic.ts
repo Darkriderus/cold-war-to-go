@@ -1,4 +1,4 @@
-import { MIN_SECS_PER_TICK, Team, TICK_PER_ROUND } from "../helper/constants";
+import { TICK_INTERVAL, Team, TICK_PER_ROUND } from "../helper/constants";
 import Unit from "../objects/unit";
 import BattlemapScene from "../scenes/BattlemapScene";
 
@@ -49,7 +49,7 @@ export default class CombatLogic {
         return new Promise((resolve) => {
             let tick = 0
             this.battleMapScene!.time.addEvent({
-                delay: MIN_SECS_PER_TICK * 1000,
+                delay: TICK_INTERVAL * 1000,
                 callback: () => {
                     this.handleTick(tick);
                     tick += 1

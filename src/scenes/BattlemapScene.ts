@@ -7,9 +7,10 @@ import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
 
 // TODO/IDEAS
-// FFT-Values with 10x Health
 // Move with D&D, Buttons for Targets as if dragged
 // Camera sliding 
+// First Real Map with Terrain
+// OOB with FFT-Values
 
 const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH * 0.05
