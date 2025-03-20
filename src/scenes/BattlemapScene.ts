@@ -1,9 +1,8 @@
-import { PlayerColor, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team, TerrainType, TOKEN_SIZE } from "../helper/constants"
+import { PlayerColor, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
-import * as fs from 'fs';
-import * as path from 'path';
 // import unitList from "../../public/dummy/dummy_oob.json"
 import unitList from "../../public/dummy/dummy_oob_v2.json"
+import mapList from "../../public/data/maps.json"
 import CombatLogic from "../logic/combat-logic"
 import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
@@ -27,95 +26,7 @@ class BattlemapScene extends Phaser.Scene {
     private cameraSpeed: number = 10;
 
     // ToDo - Move to config
-    public mapConfig = {
-        width: SMALL_MAP_PIXELSIZE_WIDTH,
-        height: SMALL_MAP_PIXELSIZE_HEIGHT,
-        mapTexture: 'bg',
-        blueDeploy: {
-            x1: SMALL_MAP_PIXELSIZE_WIDTH * 0.35, y1: SMALL_MAP_PIXELSIZE_HEIGHT * 0.0,
-            x2: SMALL_MAP_PIXELSIZE_WIDTH * 0.95, y2: SMALL_MAP_PIXELSIZE_HEIGHT * 0.2,
-        },
-        redDeploy: {
-            x1: SMALL_MAP_PIXELSIZE_WIDTH * 0.09, y1: SMALL_MAP_PIXELSIZE_HEIGHT * 0.65,
-            x2: SMALL_MAP_PIXELSIZE_WIDTH * 0.5, y2: SMALL_MAP_PIXELSIZE_HEIGHT * 0.9,
-        },
-        terrain: [
-            {
-                scene: this,
-                points: [
-                    443, 485,
-                    420, 523,
-                    422, 549,
-                    445, 553,
-                    460, 538,
-                    461, 504,
-                    452, 492
-                ],
-                moveModifier: 0,
-                blocksLOS: false,
-                showTerrain: true,
-                type: TerrainType.WATER,
-                hitModifier: 1,
-            },
-            {
-                scene: this,
-                points: [
-                    391, 739
-                    , 391, 714
-                    , 381, 672
-                    , 379, 631
-                    , 393, 590
-                    , 393, 551
-                    , 379, 533
-                    , 388, 528
-                    , 408, 574
-                    , 396, 617
-                    , 391, 642
-                    , 398, 687
-                    , 401, 732
-                    , 390, 744
-                ],
-                moveModifier: 1.5,
-                blocksLOS: false,
-                showTerrain: true,
-                type: TerrainType.ROAD,
-                hitModifier: 1,
-            },
-            {
-                scene: this,
-                points: [
-                    258, 615,
-                    300, 624,
-                    306, 608,
-                    266, 600
-                ],
-                moveModifier: 0.5,
-                blocksLOS: false,
-                type: TerrainType.CITY,
-                showTerrain: true,
-                hitModifier: 0.5,
-            },
-            {
-                scene: this,
-                points: [
-                    221, 620,
-                    265, 592,
-                    273, 569,
-                    237, 558,
-                    218, 546,
-                    202, 554,
-                    213, 581,
-                    205, 606,
-                    221, 619,
-                ],
-                moveModifier: 0.3,
-                blocksLOS: true,
-                showTerrain: true,
-                type: TerrainType.WOODS,
-                hitModifier: 0.8,
-            }
-        ],
-    }
+    public mapConfig = mapList.maps[0]
 
     constructor() {
         console.log("-- Battlemap Initializing.. --")
@@ -184,27 +95,18 @@ class BattlemapScene extends Phaser.Scene {
 
     generateTerrain() {
         this.mapConfig.terrain.forEach((terrainElement) => {
-            this.terrains.push(new Terrain(terrainElement));
+            this.terrains.push(new Terrain(this, terrainElement));
         })
     }
 
     preload() {
-        this.load.image('bg', 'public/sprites/maps/Map1.png');
+        this.load.image('map1', 'public/sprites/maps/Map1.png');
         this.load.image('tank_red', 'public/sprites/units/tank_red.svg');
         this.load.image('tank_blue', 'public/sprites/units/tank_blue.svg');
         this.load.image('tank_grey', 'public/sprites/units/tank_grey.svg');
 
         this.load.image('apc_red', 'public/sprites/units/apc_red.svg');
         this.load.image('apc_blue', 'public/sprites/units/apc_blue.svg');
-
-        //POssible Loop
-        // const assetsDir = path.resolve(__dirname, '../assets');
-        // fs.readdirSync(assetsDir).forEach(file => {
-        //     const assetKey = path.basename(file, path.extname(file));
-        //     const assetPath = path.join(assetsDir, file);
-        //     this.load.image(assetKey, assetPath);
-        // });
-
     }
 
     create() {
@@ -216,18 +118,21 @@ class BattlemapScene extends Phaser.Scene {
 
         this.cursors = this.input.keyboard?.createCursorKeys();
 
-        this.add.image(0, 0, 'bg').setOrigin(0, 0).setDisplaySize(this.mapConfig.width, this.mapConfig.height);
+        this.add.image(0, 0, 'map1').setOrigin(0, 0).setDisplaySize(this.mapConfig.width, this.mapConfig.height);
 
         this.deployZoneGraphics = this.add.graphics();
         this.drawDeployZones();
         this.generateTerrain();
-        this.terrains.push(new Terrain(this.mapConfig.terrain[0]));
+        this.terrains.push(new Terrain(this, this.mapConfig.terrain[0]));
 
 
         this.deployUnits(Team.BLUE);
         this.deployUnits(Team.RED);
+        let points: number[] = []
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
-            console.log(pointer.x + "," + pointer.y + ",");
+            points.push(pointer.x, pointer.y);
+            console.log(points.join(','));
+
             if (gameObjects.length === 0) {
                 this.deselectAll()
                 battleUiScene.showUnitInfo();

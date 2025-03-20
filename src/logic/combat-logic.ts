@@ -87,7 +87,7 @@ export default class CombatLogic {
                     }
 
                     const currentlyOccupiedTerrain = this.battleMapScene!.terrains.find(terrain => terrain.intersects(unit));
-                    const terrainModifiedDistance = unit.movementPerTick * (currentlyOccupiedTerrain?.moveModifier || 1);
+                    const terrainModifiedDistance = unit.movementPerTick * (currentlyOccupiedTerrain?.getMoveModifier(unit) || 1);
 
                     if (distanceLeft < terrainModifiedDistance) {
                         unit.move(unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!)

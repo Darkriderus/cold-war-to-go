@@ -190,7 +190,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         // [TODO] Hit Logic
         let chanceToHit = 0.8;
         if (target.terrain) {
-            chanceToHit *= target.terrain.hitModifier
+            chanceToHit *= target.terrain.getHitModifier(target)
         }
 
         this.shootEffect(target)

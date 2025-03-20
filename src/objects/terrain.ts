@@ -2,37 +2,27 @@ import { Layer, TerrainType } from "../helper/constants"
 import Unit from "./unit"
 
 type ITerrain = {
-    scene: Phaser.Scene,
-    moveModifier: number,
     blocksLOS: boolean,
     points: number[],
-    showTerrain: boolean,
-    type: TerrainType,
-    hitModifier: number
+    terrainType: string,
 }
 
 export class Terrain extends Phaser.Geom.Polygon {
     graphics: Phaser.GameObjects.Graphics
     scene: Phaser.Scene
-    moveModifier: number
     blocksLOS: boolean
-    showTerrain: boolean
-    type: TerrainType
-    hitModifier: number
+    terrainType: TerrainType
 
-    constructor(terrainData: ITerrain) {
+    constructor(scene: Phaser.Scene, terrainData: ITerrain) {
         super(terrainData.points)
 
-        this.moveModifier = terrainData.moveModifier
-        this.hitModifier = terrainData.hitModifier
         this.blocksLOS = terrainData.blocksLOS
-        this.showTerrain = terrainData.showTerrain
-        this.type = terrainData.type
-        this.scene = terrainData.scene
+        this.terrainType = terrainData.terrainType as TerrainType
+        this.scene = scene
         this.graphics = this.scene.add.graphics();
 
         this.graphics.setDepth(Layer.UI);
-        this.graphics.fillStyle(this.color, this.showTerrain ? 0.4 : 0);
+        this.graphics.fillStyle(this.color, 0.4);
         this.graphics.fillPoints(this.points, true);
     }
 
@@ -56,30 +46,69 @@ export class Terrain extends Phaser.Geom.Polygon {
     }
 
     get color() {
-        if (this.moveModifier <= 0 || this.blocksLOS) {
-            return 0xFF0000
+        switch (this.terrainType) {
+            case TerrainType.CITY: {
+                return 0xFF0000
+            }
+            case TerrainType.ROAD: {
+                return 0xFF0000
+            }
+            case TerrainType.WATER: {
+                return 0xFF0000
+            }
+            case TerrainType.WOODS: {
+                return 0xFF0000
+            }
         }
-        if (this.moveModifier < 1) {
-            return 0x00FFFF
+    }
+
+    getMoveModifier(unit: Unit) {
+        switch (this.terrainType) {
+            case TerrainType.CITY: {
+                return 0.5
+            }
+            case TerrainType.ROAD: {
+                return 1.5
+            }
+            case TerrainType.WATER: {
+                return 0
+            }
+            case TerrainType.WOODS: {
+                return 0.5
+            }
         }
-        if (this.moveModifier >= 1) {
-            return 0x00FF00
-        } return 0xFFFFFF
+    }
+
+    getHitModifier(unit: Unit) {
+        switch (this.terrainType) {
+            case TerrainType.CITY: {
+                return 0.5
+            }
+            case TerrainType.ROAD: {
+                return 1
+            }
+            case TerrainType.WATER: {
+                return 1
+            }
+            case TerrainType.WOODS: {
+                return 0.5
+            }
+        }
     }
 
     canMoveInto(unit: Unit) {
-        switch (this.type) {
+        switch (this.terrainType) {
             case TerrainType.CITY: {
-                return this.moveModifier <= 0;
+                return true
             }
             case TerrainType.ROAD: {
-                return this.moveModifier <= 0;
+                return true
             }
             case TerrainType.WATER: {
-                return this.moveModifier <= 0
+                return true
             }
             case TerrainType.WOODS: {
-                return this.moveModifier <= 0
+                return true
             }
         }
     }

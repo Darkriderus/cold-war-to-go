@@ -31,10 +31,10 @@ export enum MoveType {
 }
 
 export enum TerrainType {
-    WATER,
-    ROAD,
-    CITY,
-    WOODS
+    WATER = "water",
+    ROAD = "road",
+    CITY = "city",
+    WOODS = "woods"
 }
 
 export enum Team {
