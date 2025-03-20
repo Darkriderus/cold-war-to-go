@@ -51,7 +51,7 @@ export class Terrain extends Phaser.Geom.Polygon {
                 return 0xFF0000
             }
             case TerrainType.ROAD: {
-                return 0xFF0000
+                return 0x333333
             }
             case TerrainType.WATER: {
                 return 0xFF0000
