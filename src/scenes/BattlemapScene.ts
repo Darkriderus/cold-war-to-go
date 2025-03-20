@@ -1,5 +1,7 @@
 import { PlayerColor, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team, TerrainType, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
+import * as fs from 'fs';
+import * as path from 'path';
 // import unitList from "../../public/dummy/dummy_oob.json"
 import unitList from "../../public/dummy/dummy_oob_v2.json"
 import CombatLogic from "../logic/combat-logic"
@@ -192,6 +194,15 @@ class BattlemapScene extends Phaser.Scene {
 
         this.load.image('apc_red', 'public/sprites/units/apc_red.svg');
         this.load.image('apc_blue', 'public/sprites/units/apc_blue.svg');
+
+        //POssible Loop
+        // const assetsDir = path.resolve(__dirname, '../assets');
+        // fs.readdirSync(assetsDir).forEach(file => {
+        //     const assetKey = path.basename(file, path.extname(file));
+        //     const assetPath = path.join(assetsDir, file);
+        //     this.load.image(assetKey, assetPath);
+        // });
+
     }
 
     create() {
