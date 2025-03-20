@@ -1,0 +1,27 @@
+{
+  "units": [
+    {
+      "name": "MBT 1",
+      "movementPerTick": 10,
+      "health": 10,
+      "playerId": 0,
+      "texture": "tank",
+      "points": 999,
+      "movement": 11,
+      "movementType": 0,
+
+      "armor": {
+        "front": 10,
+        "side": 5,
+        "hModifier": 2
+      },
+      "gun": {
+        "penetrationH": 11,
+        "penetrationHe": 11,
+        "rateOfFire": 3,
+        "range": 150,
+        "antiInfantry": -1
+      }
+    }
+  ]
+}

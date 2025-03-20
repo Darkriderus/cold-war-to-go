@@ -1,6 +1,7 @@
 import { PLAYER_COLOR, PLAYERS, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, TerrainType, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
-import unitList from "../../public/dummy/dummy_oob.json"
+// import unitList from "../../public/dummy/dummy_oob.json"
+import unitList from "../../public/dummy/dummy_oob_v2.json"
 import CombatLogic from "../logic/combat-logic"
 import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
@@ -35,17 +36,17 @@ class BattlemapScene extends Phaser.Scene {
         },
         terrain: [
             {
-                scene: this, 
+                scene: this,
                 points: [
-                    443,485,
-                    420,523,
-                    422,549,
-                    445,553,
-                    460,538,
-                    461,504,
-                    452,492
-                ], 
-                moveModifier: 0, 
+                    443, 485,
+                    420, 523,
+                    422, 549,
+                    445, 553,
+                    460, 538,
+                    461, 504,
+                    452, 492
+                ],
+                moveModifier: 0,
                 blocksLOS: false,
                 showTerrain: true,
                 type: TerrainType.WATER,
@@ -54,22 +55,22 @@ class BattlemapScene extends Phaser.Scene {
             {
                 scene: this,
                 points: [
-                    391,739
-                    ,391,714
-                    ,381,672
-                    ,379,631
-                    ,393,590
-                    ,393,551
-                    ,379,533
-                    ,388,528
-                    ,408,574
-                    ,396,617
-                    ,391,642
-                    ,398,687
-                    ,401,732
-                    ,390,744
+                    391, 739
+                    , 391, 714
+                    , 381, 672
+                    , 379, 631
+                    , 393, 590
+                    , 393, 551
+                    , 379, 533
+                    , 388, 528
+                    , 408, 574
+                    , 396, 617
+                    , 391, 642
+                    , 398, 687
+                    , 401, 732
+                    , 390, 744
                 ],
-                moveModifier: 1.5, 
+                moveModifier: 1.5,
                 blocksLOS: false,
                 showTerrain: true,
                 type: TerrainType.ROAD,
@@ -78,10 +79,10 @@ class BattlemapScene extends Phaser.Scene {
             {
                 scene: this,
                 points: [
-                    258,615,
-                    300,624,
-                    306,608,
-                    266,600
+                    258, 615,
+                    300, 624,
+                    306, 608,
+                    266, 600
                 ],
                 moveModifier: 0.5,
                 blocksLOS: false,
@@ -92,15 +93,15 @@ class BattlemapScene extends Phaser.Scene {
             {
                 scene: this,
                 points: [
-                    221,620,
-                    265,592,
-                    273,569,
-                    237,558,
-                    218,546,
-                    202,554,
-                    213,581,
-                    205,606,
-                    221,619,
+                    221, 620,
+                    265, 592,
+                    273, 569,
+                    237, 558,
+                    218, 546,
+                    202, 554,
+                    213, 581,
+                    205, 606,
+                    221, 619,
                 ],
                 moveModifier: 0.3,
                 blocksLOS: true,
@@ -124,7 +125,7 @@ class BattlemapScene extends Phaser.Scene {
     deselectAll() {
         this.combatLogic.allUnits.forEach(unit => {
             unit.deselect();
-        })   
+        })
     }
     clearAllRangeCircles() {
         this.combatLogic.allUnits.forEach(unit => {
@@ -134,17 +135,17 @@ class BattlemapScene extends Phaser.Scene {
 
     drawDeployZones() {
         this.deployZoneGraphics?.clear();
-        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.BLUE, 0.15); 
+        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.BLUE, 0.15);
         this.deployZoneGraphics?.fillRect(
-            this.mapConfig.blueDeploy.x1, 
-            this.mapConfig.blueDeploy.y1, 
-            this.mapConfig.blueDeploy.x2 - this.mapConfig.blueDeploy.x1, 
+            this.mapConfig.blueDeploy.x1,
+            this.mapConfig.blueDeploy.y1,
+            this.mapConfig.blueDeploy.x2 - this.mapConfig.blueDeploy.x1,
             this.mapConfig.blueDeploy.y2 - this.mapConfig.blueDeploy.y1);
-        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.RED, 0.15); 
+        this.deployZoneGraphics?.fillStyle(PLAYER_COLOR.RED, 0.15);
         this.deployZoneGraphics?.fillRect(
-            this.mapConfig.redDeploy.x1, 
-            this.mapConfig.redDeploy.y1, 
-            this.mapConfig.redDeploy.x2 - this.mapConfig.redDeploy.x1, 
+            this.mapConfig.redDeploy.x1,
+            this.mapConfig.redDeploy.y1,
+            this.mapConfig.redDeploy.x2 - this.mapConfig.redDeploy.x1,
             this.mapConfig.redDeploy.y2 - this.mapConfig.redDeploy.y1);
     }
 
@@ -194,9 +195,9 @@ class BattlemapScene extends Phaser.Scene {
 
     create() {
         const battleUiScene = this.scene.get('BattleUI') as BattleUI;
-    
+
         this.add.image(this.mapConfig.width / 2, this.mapConfig.height / 2, 'bg').setDisplaySize(this.mapConfig.width, this.mapConfig.height);
-        
+
         this.deployZoneGraphics = this.add.graphics();
         this.drawDeployZones();
         this.generateTerrain();
@@ -213,14 +214,14 @@ class BattlemapScene extends Phaser.Scene {
                 this.combatLogic.allUnits.forEach(unit => {
                     unit.clearRangeCircles();
                 })
-            } 
+            }
         });
 
 
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
         });
         this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite, dragX: number, dragY: number) => {
-            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);        
+            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);
             const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
 
             const diffX = Math.abs(connectedUnit.x - dragX);
@@ -242,7 +243,7 @@ class BattlemapScene extends Phaser.Scene {
 
         });
         this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite) => {
-            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);        
+            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);
             const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
 
             for (const terrain of this.terrains) {
@@ -251,16 +252,13 @@ class BattlemapScene extends Phaser.Scene {
                     return;
                 }
             }
-            
-
-
 
             if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
             connectedUnit.currentOrder.movementToX = connectedUnit.ghost.x;
             connectedUnit.currentOrder.movementToY = connectedUnit.ghost.y;
             connectedUnit.currentOrder.movementType = battleUiScene.selectedOrderType;
 
-        });    
+        });
     }
 }
 

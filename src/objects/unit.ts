@@ -14,22 +14,22 @@ type IUnit = {
     playerId: number
     name: string
     health: number
-    range: number
+    range?: number
 }
 
 type Gun = {
-    penetrationH: number
-    penetrationHe: number
-    penetrationAA: number
+    penetrationH?: number
+    penetrationHe?: number
+    penetrationAA?: number
     rateOfFire: number
     range: number
-    antiInfantry: number 
+    antiInfantry: number
 }
 
 type Missile = {
-    penetrationH: number
-    penetrationHe: number
-    penetrationAA: number
+    penetrationH?: number
+    penetrationHe?: number
+    penetrationAA?: number
     rateOfFire: number
 }
 
@@ -72,7 +72,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     // LEGACY
     public movementPerTick: number;
     public range: number;
-    
+
     public selected: boolean = false;
     public currentOrder: Order | null = null
     public ghost: Phaser.GameObjects.Sprite;
@@ -98,7 +98,12 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.playerId = unitInfo.playerId;
         this.health = unitInfo.health;
         this.maxHealth = unitInfo.health;
-        this.range = unitInfo.range;
+        if (unitInfo.gun?.range) {
+            this.range = unitInfo.gun.range
+        }
+        else {
+            this.range = unitInfo.range || 10
+        }
         this.name = unitInfo.name;
 
         this.setDepth(LAYERS.UNITS)
@@ -116,7 +121,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE);
 
 
-        this.healthLabel = scene.add.text(x, y + (TOKEN_SIZE),`(${this.health}/${this.maxHealth})`)
+        this.healthLabel = scene.add.text(x, y + (TOKEN_SIZE), `(${this.health}/${this.maxHealth})`)
             .setFontSize(12)
             .setDepth(LAYERS.UNITS)
             .setBackgroundColor("grey").setOrigin(0, 0);
@@ -151,7 +156,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     clearMoveLine() {
         this.moveGraphics.clear();
     }
-    redrawMoveLine() {  
+    redrawMoveLine() {
         this.clearMoveLine()
         if (!this.alive) return
         this.moveGraphics.setDepth(LAYERS.MOVEMENT_LINES);
@@ -175,7 +180,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.redrawMoveLine()
     }
 
-    decideTargetToShoot(targetsInRange: {unit:Unit, distance: number}[]) {
+    decideTargetToShoot(targetsInRange: { unit: Unit, distance: number }[]) {
         // [TODO] Add logic
         if (targetsInRange.length === 0) return null
         return targetsInRange.sort((a, b) => a.distance - b.distance)[0]
@@ -184,7 +189,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     shoot(target: Unit) {
         // [TODO] Hit Logic
         let chanceToHit = 0.8;
-        if (target.terrain){
+        if (target.terrain) {
             chanceToHit *= target.terrain.hitModifier
         }
 
@@ -197,8 +202,8 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     damage(damage: number) {
         this.health -= damage;
-        
-        if(this.health <= 0) {
+
+        if (this.health <= 0) {
             console.log(`!!${this.name} died!`)
             // this.destroy();
             this.moveGraphics.clear();
@@ -228,16 +233,16 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         new Promise<void>((resolve) => {
             let completedFlashes = 0;
             for (let i = 0; i < flashTimes; i++) {
-                this.scene.time.delayedCall(i * delay * 2 , () => {
+                this.scene.time.delayedCall(i * delay * 2, () => {
                     this.hitGraphics.lineStyle(4, this.playerColor, 1);
                     this.hitGraphics.setDepth(LAYERS.MOVEMENT_LINES);
                     this.hitGraphics.lineBetween(this.center.x, this.center.y, target.center.x + lineOffset, target.center.y);
                 });
-    
+
                 this.scene.time.delayedCall(i * delay * 2 + delay, () => {
                     this.hitGraphics.clear();
                     completedFlashes++;
-    
+
                     // Resolve when the last flash is completed
                     if (completedFlashes === flashTimes) {
                         resolve();
@@ -248,7 +253,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
 
     setGhostVisible(visible: boolean) {
-        this.ghost.setAlpha(visible? 0.6 : 0);
+        this.ghost.setAlpha(visible ? 0.6 : 0);
 
     }
 
