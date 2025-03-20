@@ -21,7 +21,7 @@ export class Terrain extends Phaser.Geom.Polygon {
     hitModifier: number
 
     constructor(terrainData: ITerrain) {
-        super(terrainData.points) 
+        super(terrainData.points)
 
         this.moveModifier = terrainData.moveModifier
         this.hitModifier = terrainData.hitModifier
@@ -30,7 +30,7 @@ export class Terrain extends Phaser.Geom.Polygon {
         this.type = terrainData.type
         this.scene = terrainData.scene
         this.graphics = this.scene.add.graphics();
-        
+
         this.graphics.setDepth(LAYERS.UI);
         this.graphics.fillStyle(this.color, this.showTerrain ? 0.4 : 0);
         this.graphics.fillPoints(this.points, true);
@@ -49,14 +49,14 @@ export class Terrain extends Phaser.Geom.Polygon {
         for (const point of rectPoints) {
             if (Phaser.Geom.Polygon.Contains(this, point.x, point.y)) {
                 return true
-            } 
+            }
         }
 
         return false
     }
 
     get color() {
-        if (this.moveModifier<=0 || this.blocksLOS) {
+        if (this.moveModifier <= 0 || this.blocksLOS) {
             return 0xFF0000
         }
         if (this.moveModifier < 1) {
@@ -68,10 +68,19 @@ export class Terrain extends Phaser.Geom.Polygon {
     }
 
     canMoveInto(unit: Unit) {
-        if (this.moveModifier <= 0) {   
-            return false
-        } else {
-            return true
+        switch (this.type) {
+            case TerrainType.CITY: {
+                return this.moveModifier <= 0;
+            }
+            case TerrainType.ROAD: {
+                return this.moveModifier <= 0;
+            }
+            case TerrainType.WATER: {
+                return this.moveModifier <= 0
+            }
+            case TerrainType.WOODS: {
+                return this.moveModifier <= 0
+            }
         }
     }
 }
