@@ -7,11 +7,11 @@ import CombatLogic from "../logic/combat-logic"
 import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
 import { coordToGrid } from "../helper/mapHelper"
+import { BattleMap } from "../objects/battleMap"
 
 // TODO/IDEAS
 // Fullscreen + Camerafix
 // Type Cleanup
-// Tiling der Map + Editor
 // LOS Check
 // Pathfinding
 // Icons as Class with Rectangle and Icon
@@ -23,6 +23,7 @@ import { coordToGrid } from "../helper/mapHelper"
 
 class BattlemapScene extends Phaser.Scene {
     public combatLogic: CombatLogic;
+    public map: BattleMap;
     public terrains: Terrain[][] = []
 
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -35,6 +36,7 @@ class BattlemapScene extends Phaser.Scene {
 
         super({ key: 'BattleMap', active: true });
         this.combatLogic = new CombatLogic();
+        this.map = new BattleMap();
         console.log("-- ..Done! --")
     }
 

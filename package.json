@@ -17,6 +17,7 @@
     "vite": "^3.1.0"
   },
   "dependencies": {
+    "easystarjs": "^0.4.4",
     "phaser": "^3.88.2"
   }
 }

@@ -3,7 +3,7 @@ import Unit from "../objects/unit"
 export const GRID_SIZE = 25
 export const TOKEN_SIZE = GRID_SIZE
 
-export const TICK_PER_ROUND = 5
+export const TICK_PER_ROUND = 10
 export const TICK_INTERVAL = 1
 
 export enum Layer {

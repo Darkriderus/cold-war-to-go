@@ -1,3 +1,4 @@
+import path from "path";
 import { TICK_INTERVAL, Team, TICK_PER_ROUND } from "../helper/constants";
 import { coordToGrid, gridToCoord } from "../helper/mapHelper";
 import Unit from "../objects/unit";
@@ -47,7 +48,7 @@ export default class CombatLogic {
         console.log("-- Round Done! --")
     }
 
-    calculateRound() {
+    async calculateRound() {
         return new Promise((resolve) => {
             let tick = 0
             this.battleMapScene!.time.addEvent({
@@ -66,12 +67,12 @@ export default class CombatLogic {
         });
     }
 
-    handleTick(tick: number): void {
+    async handleTick(tick: number) {
         console.log("-- Tick " + tick + " --")
-        this.units.forEach((playerUnits, playerId) => {
+        for (const playerId of [Team.BLUE, Team.RED]) {
             const enemyAliveUnits = this.units[playerId === Team.BLUE ? Team.RED : Team.BLUE].filter(unit => unit.health > 0);
-
-            playerUnits.forEach(unit => {
+            const playerUnits = this.units[playerId];
+            for (const unit of playerUnits) {
                 console.log("-------------");
                 console.log(`[${unit.playerId === Team.BLUE ? 'Blue' : 'Red'}] unit ${unit.name}..`);
                 if (unit.health <= 0) {
@@ -82,30 +83,47 @@ export default class CombatLogic {
                     console.log("   >no order");
                 } else {
                     // MOVE
-                    const orderCoord = gridToCoord(unit!.currentOrder!.movementToX!, unit.currentOrder.movementToY!);
-                    const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, orderCoord.x, orderCoord.y);
-                    if (distanceLeft === 0) {
+                    if (unit.gridX === unit.currentOrder.movementToX! && unit.gridY === unit.currentOrder.movementToY!) {
                         console.log("   >stop.");
                     }
 
-                    const currentlyOccupiedTerrain = unit.terrain
-                    const terrainModifiedDistance = unit.movementInAbsolutePerTick * (currentlyOccupiedTerrain?.getMoveModifier(unit) || 1);
-
-                    console.log("   >" + currentlyOccupiedTerrain.terrainType)
-
-                    if (distanceLeft < terrainModifiedDistance) {
-                        unit.move(unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!)
-                        console.log("   >move (" + terrainModifiedDistance + ")+stop");
+                    // TODO inefficient!!!
+                    let pathToTarget = await this.battleMapScene!.map.calculatePath(unit.gridX, unit.gridY, unit.currentOrder.movementToX!, unit.currentOrder.movementToY!) as any[];
+                    pathToTarget.shift();
+                    console.log(pathToTarget.length)
+                    // TODO Wrong - missing modifier
+                    if (pathToTarget.length <= unit.movementPerTick) {
+                        unit.move(unit.currentOrder.movementToX!, unit.currentOrder.movementToY!);
+                        console.log("   >move (" + pathToTarget.length + ")+stop");
+                    } else {
+                        console.log(pathToTarget[unit.movementPerTick])
+                        unit.move(pathToTarget[unit.movementPerTick].x, pathToTarget[unit.movementPerTick].y);
                     }
-                    else {
-                        const angle = Phaser.Math.Angle.Between(unit.x, unit.y, orderCoord.x, orderCoord.y);
-                        const newX = unit.x + Math.cos(angle) * terrainModifiedDistance;
-                        const newY = unit.y + Math.sin(angle) * terrainModifiedDistance;
-                        const grid = coordToGrid(newX, newY);
 
-                        unit.move(grid.x, grid.y)
-                        console.log("   >move (" + terrainModifiedDistance + ")");
-                    }
+                    // const orderCoord = gridToCoord(unit!.currentOrder!.movementToX!, unit.currentOrder.movementToY!);
+                    // const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, orderCoord.x, orderCoord.y);
+                    // if (distanceLeft === 0) {
+                    //     console.log("   >stop.");
+                    // }
+
+                    // const currentlyOccupiedTerrain = unit.terrain
+                    // const terrainModifiedDistance = unit.movementInAbsolutePerTick * (currentlyOccupiedTerrain?.getMoveModifier(unit) || 1);
+
+                    // console.log("   >" + currentlyOccupiedTerrain.terrainType)
+
+                    // if (distanceLeft < terrainModifiedDistance) {
+                    //     unit.move(unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!)
+                    //     console.log("   >move (" + terrainModifiedDistance + ")+stop");
+                    // }
+                    // else {
+                    //     const angle = Phaser.Math.Angle.Between(unit.x, unit.y, orderCoord.x, orderCoord.y);
+                    //     const newX = unit.x + Math.cos(angle) * terrainModifiedDistance;
+                    //     const newY = unit.y + Math.sin(angle) * terrainModifiedDistance;
+                    //     const grid = coordToGrid(newX, newY);
+
+                    //     unit.move(grid.x, grid.y)
+                    //     console.log("   >move (" + terrainModifiedDistance + ")");
+                    // }
                 }
 
                 // SHOOT
@@ -122,11 +140,8 @@ export default class CombatLogic {
                     console.log("   >shoot " + targetToShoot.unit.name);
                 }
                 unit.hitGraphics.clear();
-            })
-        })
+            }
+        }
 
     }
-
-
-
 }
