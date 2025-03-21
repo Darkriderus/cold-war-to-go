@@ -152,6 +152,26 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     }
 
+    intersects(enemy: Phaser.GameObjects.Sprite) {
+        const enemyRect = enemy.getBounds();
+        const rectPoints = [
+            new Phaser.Geom.Point(enemyRect.x, enemyRect.y), // Top-left
+            new Phaser.Geom.Point(enemyRect.x + enemyRect.width, enemyRect.y), // Top-right
+            new Phaser.Geom.Point(enemyRect.x, enemyRect.y + enemyRect.height), // Bottom-left
+            new Phaser.Geom.Point(enemyRect.x + enemyRect.width, enemyRect.y + enemyRect.height) // Bottom-right
+        ];
+
+        for (const point of rectPoints) {
+            const myRect = this.getBounds();
+
+            if (Phaser.Geom.Rectangle.Contains(myRect, point.x, point.y)) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     clearMoveLine() {
         this.moveGraphics.clear();
     }

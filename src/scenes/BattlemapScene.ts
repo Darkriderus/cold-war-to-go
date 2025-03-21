@@ -175,19 +175,44 @@ class BattlemapScene extends Phaser.Scene {
             const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);
             const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
 
-            for (const terrain of this.terrains) {
-                if (terrain.intersects(connectedUnit.ghost) && !terrain.canMoveInto(connectedUnit)) {
-                    connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
-                    return;
+            if (this.selectedOrderType === OrderType.ATTACK) {
+                for (const enemyUnit of this.combatLogic.units[connectedUnit.playerId === Team.BLUE ? Team.RED : Team.BLUE]) {
+                    if (enemyUnit.intersects(connectedUnit.ghost)) {
+                        connectedUnit.moveGhost(enemyUnit.x, enemyUnit.y);
+                        connectedUnit.ghost.setAlpha(0);
+
+                        connectedUnit.currentOrder = {
+                            movementToX: connectedUnit.x,
+                            movementToY: connectedUnit.y,
+                            orderType: this.selectedOrderType
+                        }
+                        console.log(`Unit ${connectedUnit.name} got order`, connectedUnit.currentOrder);
+                        return;
+                    }
                 }
+                connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
+
+
+
+            } else {
+                for (const terrain of this.terrains) {
+                    if (terrain.intersects(connectedUnit.ghost) && !terrain.canMoveInto(connectedUnit)) {
+                        connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
+                        return;
+                    }
+                }
+
+                connectedUnit.currentOrder = {
+                    movementToX: connectedUnit.ghost.x,
+                    movementToY: connectedUnit.ghost.y,
+                    orderType: this.selectedOrderType
+                }
+                console.log(`Unit ${connectedUnit.name} got order`, connectedUnit.currentOrder);
             }
 
-            connectedUnit.currentOrder = {
-                movementToX: connectedUnit.ghost.x,
-                movementToY: connectedUnit.ghost.y,
-                orderType: this.selectedOrderType
-            }
-            console.log(`Unit ${connectedUnit.name} got order`, connectedUnit.currentOrder);
+
+
+
 
         });
     }
