@@ -1,6 +1,4 @@
-import path from "path";
 import { TICK_INTERVAL, Team, TICK_PER_ROUND } from "../helper/constants";
-import { coordToGrid, gridToCoord } from "../helper/mapHelper";
 import Unit from "../objects/unit";
 import BattlemapScene from "../scenes/BattlemapScene";
 import BattleUI from "../scenes/BattleUI";
@@ -90,40 +88,17 @@ export default class CombatLogic {
                     // TODO inefficient!!!
                     let pathToTarget = await this.battleMapScene!.map.calculatePath(unit.gridX, unit.gridY, unit.currentOrder.movementToX!, unit.currentOrder.movementToY!) as any[];
                     pathToTarget.shift();
-                    console.log(pathToTarget.length)
-                    // TODO Wrong - missing modifier
-                    if (pathToTarget.length <= unit.movementPerTick) {
-                        unit.move(unit.currentOrder.movementToX!, unit.currentOrder.movementToY!);
-                        console.log("   >move (" + pathToTarget.length + ")+stop");
-                    } else {
-                        console.log(pathToTarget[unit.movementPerTick])
-                        unit.move(pathToTarget[unit.movementPerTick].x, pathToTarget[unit.movementPerTick].y);
-                    }
 
-                    // const orderCoord = gridToCoord(unit!.currentOrder!.movementToX!, unit.currentOrder.movementToY!);
-                    // const distanceLeft = Phaser.Math.Distance.Between(unit.x, unit.y, orderCoord.x, orderCoord.y);
-                    // if (distanceLeft === 0) {
-                    //     console.log("   >stop.");
-                    // }
-
-                    // const currentlyOccupiedTerrain = unit.terrain
-                    // const terrainModifiedDistance = unit.movementInAbsolutePerTick * (currentlyOccupiedTerrain?.getMoveModifier(unit) || 1);
-
-                    // console.log("   >" + currentlyOccupiedTerrain.terrainType)
-
-                    // if (distanceLeft < terrainModifiedDistance) {
-                    //     unit.move(unit.currentOrder?.movementToX!, unit.currentOrder?.movementToY!)
-                    //     console.log("   >move (" + terrainModifiedDistance + ")+stop");
-                    // }
-                    // else {
-                    //     const angle = Phaser.Math.Angle.Between(unit.x, unit.y, orderCoord.x, orderCoord.y);
-                    //     const newX = unit.x + Math.cos(angle) * terrainModifiedDistance;
-                    //     const newY = unit.y + Math.sin(angle) * terrainModifiedDistance;
-                    //     const grid = coordToGrid(newX, newY);
-
-                    //     unit.move(grid.x, grid.y)
-                    //     console.log("   >move (" + terrainModifiedDistance + ")");
-                    // }
+                    let movementPointsLeft = unit.movementPerTick
+                    for (const tile of pathToTarget) {
+                        const movementCost = 1 / this.battleMapScene!.terrains[tile.y][tile.x].getMoveModifier(unit);
+                        if (movementPointsLeft >= movementCost) {
+                            movementPointsLeft -= movementCost;
+                            unit.move(tile.x, tile.y);
+                        } else {
+                            break
+                        }
+                    };
                 }
 
                 // SHOOT

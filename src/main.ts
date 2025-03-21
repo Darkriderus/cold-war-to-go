@@ -4,6 +4,14 @@ import BattlemapScene from './scenes/BattlemapScene'
 import BattleUI from './scenes/BattleUI'
 import MapGenScene from './scenes/MapGenScene'
 
+function getUrlParam(param: string): string | null {
+	const urlParams = new URLSearchParams(window.location.search);
+	return urlParams.get(param);
+}
+
+const mapGen = getUrlParam('mapgen');
+
+
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	parent: 'app',
@@ -21,8 +29,7 @@ const config: Phaser.Types.Core.GameConfig = {
 			},
 		},
 	},
-	scene: [BattlemapScene, BattleUI],
-	// scene: [MapGenScene],
+	scene: [mapGen ? MapGenScene : BattlemapScene, BattleUI],
 }
 
 export default new Phaser.Game(config)

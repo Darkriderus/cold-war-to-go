@@ -1,12 +1,16 @@
 import EasyStar from "easystarjs";
 import mapGrid from "../../public/data/map1Grid.json"
-import { TERRAIN_INFO } from "./terrain";
+import { Terrain, TERRAIN_INFO } from "./terrain";
 
 export class BattleMap {
     easyStar: EasyStar.js
     movementGrid: number[][]
+    scene: Phaser.Scene
+    public terrains: Terrain[][] = []
 
-    constructor() {
+
+    constructor(scene: Phaser.Scene) {
+        this.scene = scene
         this.easyStar = new EasyStar.js();
         this.movementGrid = this.gridToMovementCost()
         this.easyStar.setGrid(this.movementGrid);
@@ -29,6 +33,22 @@ export class BattleMap {
             });
             this.easyStar.calculate();
         })
+    }
+
+    generateTerrain() {
+        for (let gridY = 0; gridY < mapGrid.length; gridY++) {
+            this.terrains[gridY] = [];
+            for (let gridX = 0; gridX < mapGrid[gridY].length; gridX++) {
+
+                if (mapGrid[gridY] && mapGrid[gridY][gridX] !== undefined) {
+                    this.terrains[gridY][gridX] = new Terrain(this.scene, {
+                        gridCol: gridX,
+                        gridRow: gridY,
+                        terrainColor: mapGrid[gridY][gridX]
+                    })
+                }
+            }
+        }
     }
 
     gridToMovementCost() {

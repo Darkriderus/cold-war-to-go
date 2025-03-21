@@ -170,7 +170,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     get terrain() {
         const battlemapScene = this.scene.scene.get('BattleMap') as BattlemapScene
-        return battlemapScene.terrains[this.gridY][this.gridX];
+        return battlemapScene.map.terrains[this.gridY][this.gridX];
 
     }
 

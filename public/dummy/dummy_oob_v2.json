@@ -2,7 +2,7 @@
   "units": [
     {
       "name": "MBT BLUE 1",
-      "movementPerTick": 3,
+      "movementPerTick": 4,
       "health": 10,
       "playerId": 0,
       "texture": "tank",

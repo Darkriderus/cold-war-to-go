@@ -12,7 +12,7 @@ export const TERRAIN_INFO = {
         color: 0xd9b382,
         blocksLOS: false,
         hitModifier: 1,
-        moveModifier: 30
+        moveModifier: 1.5
     },
     [TerrainType.WATER]: {
         color: 0x2060d6,

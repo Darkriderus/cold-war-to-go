@@ -2,10 +2,8 @@ import { OrderType, Team } from "../helper/constants"
 import Unit from "../objects/unit"
 // import unitList from "../../public/dummy/dummy_oob.json"
 import unitList from "../../public/dummy/dummy_oob_v2.json"
-import mapGrid from "../../public/data/map1Grid.json"
 import CombatLogic from "../logic/combat-logic"
 import BattleUI from "./BattleUI"
-import { Terrain } from "../objects/terrain"
 import { coordToGrid } from "../helper/mapHelper"
 import { BattleMap } from "../objects/battleMap"
 
@@ -24,8 +22,6 @@ import { BattleMap } from "../objects/battleMap"
 class BattlemapScene extends Phaser.Scene {
     public combatLogic: CombatLogic;
     public map: BattleMap;
-    public terrains: Terrain[][] = []
-
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
     private cameraSpeed: number = 30;
 
@@ -36,7 +32,7 @@ class BattlemapScene extends Phaser.Scene {
 
         super({ key: 'BattleMap', active: true });
         this.combatLogic = new CombatLogic();
-        this.map = new BattleMap();
+        this.map = new BattleMap(this);
         console.log("-- ..Done! --")
     }
 
@@ -70,21 +66,7 @@ class BattlemapScene extends Phaser.Scene {
         })
     }
 
-    generateTerrain() {
-        for (let gridY = 0; gridY < mapGrid.length; gridY++) {
-            this.terrains[gridY] = [];
-            for (let gridX = 0; gridX < mapGrid[gridY].length; gridX++) {
 
-                if (mapGrid[gridY] && mapGrid[gridY][gridX] !== undefined) {
-                    this.terrains[gridY][gridX] = new Terrain(this, {
-                        gridCol: gridX,
-                        gridRow: gridY,
-                        terrainColor: mapGrid[gridY][gridX]
-                    })
-                }
-            }
-        }
-    }
 
     preload() {
         this.load.image('map1', 'public/sprites/maps/Map1.png');
@@ -99,7 +81,7 @@ class BattlemapScene extends Phaser.Scene {
     create() {
         const battleUiScene = this.scene.get('BattleUI') as BattleUI;
         this.combatLogic.initialize(this, battleUiScene);
-        this.generateTerrain();
+        this.map.generateTerrain();
 
 
         this.input.on('wheel', (_pointer: any, _gameObjects: any, _deltaX: number, deltaY: number, _deltaZ: number) => {
@@ -128,7 +110,7 @@ class BattlemapScene extends Phaser.Scene {
 
             connectedUnit.ghost.move(grid.x, grid.y);
 
-            const terrain = this.terrains[grid.y][grid.x];
+            const terrain = this.map.terrains[grid.y][grid.x];
             console.log(grid, terrain.terrainType)
             if (!terrain.canMoveInto(connectedUnit)) {
                 connectedUnit.ghost.hide()
@@ -156,7 +138,7 @@ class BattlemapScene extends Phaser.Scene {
                 connectedUnit.ghost.move(connectedUnit.gridX, connectedUnit.gridY);
                 connectedUnit.ghost.hide()
             } else {
-                const terrain = this.terrains[connectedUnit.ghost.gridY][connectedUnit.ghost.gridX];
+                const terrain = this.map.terrains[connectedUnit.ghost.gridY][connectedUnit.ghost.gridX];
                 if (!terrain.canMoveInto(connectedUnit)) {
                     connectedUnit.ghost.move(connectedUnit.gridX, connectedUnit.gridY);
                     return;
