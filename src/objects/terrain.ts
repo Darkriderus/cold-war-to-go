@@ -1,100 +1,85 @@
-import { Layer, TerrainType } from "../helper/constants"
+import { GRID_SIZE, Layer, TerrainType } from "../helper/constants"
 import Unit from "./unit"
 
-type ITerrain = {
-    blocksLOS: boolean,
-    points: number[],
-    terrainType: string,
+export const TERRAIN_INFO = {
+    [TerrainType.CITY]: {
+        color: 0x7f7f7f,
+        blocksLOS: true,
+        hitModifier: 0.5,
+        moveModifier: 0.5
+    },
+    [TerrainType.ROAD]: {
+        color: 0xd9b382,
+        blocksLOS: false,
+        hitModifier: 1,
+        moveModifier: 1.5
+    },
+    [TerrainType.WATER]: {
+        color: 0x2060d6,
+        blocksLOS: false,
+        hitModifier: 1,
+        moveModifier: 0
+    },
+    [TerrainType.WOODS]: {
+        color: 0x228B22,
+        blocksLOS: true,
+        hitModifier: 0.5,
+        moveModifier: 0.5
+    },
+    [TerrainType.OPEN]: {
+        color: 0xFFFFFF,
+        blocksLOS: false,
+        hitModifier: 1,
+        moveModifier: 1
+    },
 }
 
-export class Terrain extends Phaser.Geom.Polygon {
+
+type ITerrain = {
+    terrainColor: number,
+    gridRow: number,
+    gridCol: number
+}
+
+
+export class Terrain extends Phaser.GameObjects.Rectangle {
     graphics: Phaser.GameObjects.Graphics
     scene: Phaser.Scene
-    blocksLOS: boolean
     terrainType: TerrainType
 
     constructor(scene: Phaser.Scene, terrainData: ITerrain) {
-        super(terrainData.points)
-
-        this.blocksLOS = terrainData.blocksLOS
-        this.terrainType = terrainData.terrainType as TerrainType
+        super(scene, terrainData.gridCol * GRID_SIZE, terrainData.gridRow * GRID_SIZE, GRID_SIZE, GRID_SIZE, terrainData.terrainColor);
         this.scene = scene
         this.graphics = this.scene.add.graphics();
+        this.terrainType = this.colorToTerrain(terrainData.terrainColor)!
 
-        this.graphics.setDepth(Layer.UI);
-        this.graphics.fillStyle(this.color, 0.4);
-        this.graphics.fillPoints(this.points, true);
+        this.graphics.setDepth(Layer.BACKGROUND);
+        this.graphics.fillStyle(this.color, 1);
+        this.graphics.fillRect(this.x, this.y, GRID_SIZE, GRID_SIZE);
     }
 
-    intersects(x: number, y: number) {
-        return (Phaser.Geom.Polygon.Contains(this, x, y))
+    colorToTerrain(color: number) {
+        let returnedTerrain: TerrainType = TerrainType.OPEN
+        Object.entries(TERRAIN_INFO).forEach(([terrainType, terrain]) => {
+            if (terrain.color - color == 0) {
+                returnedTerrain = terrainType as TerrainType;
+            }
+        })
+        return returnedTerrain
     }
-
     get color() {
-        switch (this.terrainType) {
-            case TerrainType.CITY: {
-                return 0xFF0000
-            }
-            case TerrainType.ROAD: {
-                return 0x333333
-            }
-            case TerrainType.WATER: {
-                return 0xFF0000
-            }
-            case TerrainType.WOODS: {
-                return 0xFF0000
-            }
-        }
+        return TERRAIN_INFO[this.terrainType].color
     }
 
-    getMoveModifier(unit: Unit) {
-        switch (this.terrainType) {
-            case TerrainType.CITY: {
-                return 0.5
-            }
-            case TerrainType.ROAD: {
-                return 1.5
-            }
-            case TerrainType.WATER: {
-                return 0
-            }
-            case TerrainType.WOODS: {
-                return 0.5
-            }
-        }
+    getMoveModifier(_unit: Unit) {
+        return TERRAIN_INFO[this.terrainType].moveModifier
     }
 
-    getHitModifier(unit: Unit) {
-        switch (this.terrainType) {
-            case TerrainType.CITY: {
-                return 0.5
-            }
-            case TerrainType.ROAD: {
-                return 1
-            }
-            case TerrainType.WATER: {
-                return 1
-            }
-            case TerrainType.WOODS: {
-                return 0.5
-            }
-        }
+    getHitModifier(_unit: Unit) {
+        return TERRAIN_INFO[this.terrainType].hitModifier
     }
 
-    canMoveInto(unit: Unit) {
-        switch (this.terrainType) {
-            case TerrainType.CITY: {
-                return true
-            }
-            case TerrainType.ROAD: {
-                return true
-            }
-            case TerrainType.WATER: {
-                return true
-            }
-            case TerrainType.WOODS: {
-                return true
-            }
-        }
+    canMoveInto(_unit: Unit) {
+        return TERRAIN_INFO[this.terrainType].moveModifier > 0
     }
 }

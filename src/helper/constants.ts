@@ -1,14 +1,10 @@
 import Unit from "../objects/unit"
 
-export const PIXEL_PER_KILOMETER = 100
-export const TOKEN_SIZE = PIXEL_PER_KILOMETER / 4
-
-export const SMALL_MAP_PIXELSIZE_WIDTH = 18 * PIXEL_PER_KILOMETER
-export const SMALL_MAP_PIXELSIZE_HEIGHT = 9 * PIXEL_PER_KILOMETER
+export const GRID_SIZE = 25
+export const TOKEN_SIZE = GRID_SIZE
 
 export const TICK_PER_ROUND = 5
 export const TICK_INTERVAL = 1
-
 
 export enum Layer {
     BACKGROUND = 0,
@@ -35,7 +31,8 @@ export enum TerrainType {
     WATER = "water",
     ROAD = "road",
     CITY = "city",
-    WOODS = "woods"
+    WOODS = "woods",
+    OPEN = "open"
 }
 
 export enum Team {

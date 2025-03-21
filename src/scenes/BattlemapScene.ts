@@ -1,11 +1,12 @@
-import { OrderType, PlayerColor, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team, TOKEN_SIZE } from "../helper/constants"
+import { OrderType, Team } from "../helper/constants"
 import Unit from "../objects/unit"
 // import unitList from "../../public/dummy/dummy_oob.json"
 import unitList from "../../public/dummy/dummy_oob_v2.json"
-import mapList from "../../public/data/maps.json"
+import mapGrid from "../../public/data/map1Grid.json"
 import CombatLogic from "../logic/combat-logic"
 import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
+import { coordToGrid } from "../helper/mapHelper"
 
 // TODO/IDEAS
 // Fullscreen + Camerafix
@@ -20,24 +21,14 @@ import { Terrain } from "../objects/terrain"
 // Fog of War
 
 
-const DBG_GAP_BETWEEN_UNITS = 50
-const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH * 0.05
-
 class BattlemapScene extends Phaser.Scene {
-    private deployZoneGraphics: Phaser.GameObjects.Graphics | undefined;
-
     public combatLogic: CombatLogic;
-    public terrains: Terrain[] = []
+    public terrains: Terrain[][] = []
 
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
-    private cameraSpeed: number = 10;
+    private cameraSpeed: number = 30;
 
     public selectedOrderType: OrderType = OrderType.FASTMOVE
-
-    // ToDo - Move to config
-    public mapConfig = mapList.maps[0]
-
-
 
     constructor() {
         console.log("-- Battlemap Initializing.. --")
@@ -58,30 +49,11 @@ class BattlemapScene extends Phaser.Scene {
         })
     }
 
-    drawDeployZones() {
-        this.deployZoneGraphics?.clear();
-        this.deployZoneGraphics?.fillStyle(PlayerColor.BLUE, 0.15);
-        this.deployZoneGraphics?.fillRect(
-            this.mapConfig.blueDeploy.x1,
-            this.mapConfig.blueDeploy.y1,
-            this.mapConfig.blueDeploy.x2 - this.mapConfig.blueDeploy.x1,
-            this.mapConfig.blueDeploy.y2 - this.mapConfig.blueDeploy.y1);
-        this.deployZoneGraphics?.fillStyle(PlayerColor.RED, 0.15);
-        this.deployZoneGraphics?.fillRect(
-            this.mapConfig.redDeploy.x1,
-            this.mapConfig.redDeploy.y1,
-            this.mapConfig.redDeploy.x2 - this.mapConfig.redDeploy.x1,
-            this.mapConfig.redDeploy.y2 - this.mapConfig.redDeploy.y1);
-    }
-
     deployUnits(playerTeam: Team) {
         const battleUiScene = this.scene.get('BattleUI') as BattleUI;
 
-        unitList.units.filter(unit => unit.playerId === playerTeam).forEach((unitToLoad, idx) => {
-            const leftEdge = playerTeam === Team.BLUE ? this.mapConfig.blueDeploy.x1 + DBG_OFFSET : this.mapConfig.redDeploy.x1 + DBG_OFFSET;
-            const topEdge = playerTeam === Team.BLUE ? this.mapConfig.blueDeploy.y1 + DBG_OFFSET : this.mapConfig.redDeploy.y1 + DBG_OFFSET
-
-            const unit = new Unit(this, (leftEdge + (idx * DBG_GAP_BETWEEN_UNITS)), topEdge, unitToLoad.texture, unitToLoad);
+        unitList.units.filter(unit => unit.playerId === playerTeam).forEach((unitToLoad) => {
+            const unit = new Unit(this, 20, 20, unitToLoad.texture, unitToLoad);
             unit.on('pointerdown', () => {
                 if (!unit.selected) {
                     this.deselectAll()
@@ -97,9 +69,19 @@ class BattlemapScene extends Phaser.Scene {
     }
 
     generateTerrain() {
-        this.mapConfig.terrain.forEach((terrainElement) => {
-            this.terrains.push(new Terrain(this, terrainElement));
-        })
+        for (let gridY = 0; gridY < mapGrid.length; gridY++) {
+            this.terrains[gridY] = [];
+            for (let gridX = 0; gridX < mapGrid[gridY].length; gridX++) {
+
+                if (mapGrid[gridY] && mapGrid[gridY][gridX] !== undefined) {
+                    this.terrains[gridY][gridX] = new Terrain(this, {
+                        gridCol: gridX,
+                        gridRow: gridY,
+                        terrainColor: mapGrid[gridY][gridX]
+                    })
+                }
+            }
+        }
     }
 
     preload() {
@@ -115,6 +97,8 @@ class BattlemapScene extends Phaser.Scene {
     create() {
         const battleUiScene = this.scene.get('BattleUI') as BattleUI;
         this.combatLogic.initialize(this, battleUiScene);
+        this.generateTerrain();
+
 
         this.input.on('wheel', (_pointer: any, _gameObjects: any, _deltaX: number, deltaY: number, _deltaZ: number) => {
             this.cameras.main.zoom += deltaY * -0.001;
@@ -122,14 +106,6 @@ class BattlemapScene extends Phaser.Scene {
         });
 
         this.cursors = this.input.keyboard?.createCursorKeys();
-
-        this.add.image(0, 0, 'map1').setOrigin(0, 0).setDisplaySize(this.mapConfig.width, this.mapConfig.height);
-
-        this.deployZoneGraphics = this.add.graphics();
-        this.drawDeployZones();
-        this.generateTerrain();
-        this.terrains.push(new Terrain(this, this.mapConfig.terrain[0]));
-
 
         this.deployUnits(Team.BLUE);
         this.deployUnits(Team.RED);
@@ -143,82 +119,67 @@ class BattlemapScene extends Phaser.Scene {
             }
         });
 
-
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
         });
         this.input.on('drag', (_pointer: Phaser.Input.Pointer, connectedUnit: Unit, dragX: number, dragY: number) => {
-            const diffX = Math.abs(connectedUnit.x - dragX);
-            const diffY = Math.abs(connectedUnit.y - dragY);
+            const grid = coordToGrid(dragX, dragY);
 
-            if (diffX < TOKEN_SIZE && diffY < TOKEN_SIZE) {
-                connectedUnit.ghost.move(connectedUnit.x, connectedUnit.y);
-                connectedUnit.ghost.hide();
+            connectedUnit.ghost.move(grid.x, grid.y);
+
+            const terrain = this.terrains[grid.y][grid.x];
+            console.log(grid, terrain.terrainType)
+            if (!terrain.canMoveInto(connectedUnit)) {
+                connectedUnit.ghost.hide()
             } else {
-                connectedUnit.ghost.move(dragX, dragY);
                 connectedUnit.ghost.show();
-            }
-
-            for (const terrain of this.terrains) {
-                if (terrain.intersects(connectedUnit.ghost.x, connectedUnit.ghost.y) && !terrain.canMoveInto(connectedUnit)) {
-                    connectedUnit.ghost.hide()
-                }
             }
 
         });
         this.input.on('dragend', (_pointer: Phaser.Input.Pointer, connectedUnit: Unit) => {
-            console.log(connectedUnit.ghost.visible)
             if (this.selectedOrderType === OrderType.ATTACK) {
                 for (const enemyUnit of this.combatLogic.units[connectedUnit.playerId === Team.BLUE ? Team.RED : Team.BLUE]) {
                     if (enemyUnit.intersects(connectedUnit.ghost.x, connectedUnit.ghost.y)) {
-                        connectedUnit.ghost.move(enemyUnit.x, enemyUnit.y);
+                        connectedUnit.ghost.move(enemyUnit.gridX, enemyUnit.gridY);
                         connectedUnit.ghost.hide()
 
                         connectedUnit.currentOrder = {
-                            movementToX: connectedUnit.x,
-                            movementToY: connectedUnit.y,
+                            movementToX: connectedUnit.gridX,
+                            movementToY: connectedUnit.gridY,
                             orderType: this.selectedOrderType
                         }
                         console.log(`Unit ${connectedUnit.name} got order`, connectedUnit.currentOrder);
                         return;
                     }
                 }
-                connectedUnit.ghost.move(connectedUnit.x, connectedUnit.y);
-
-
-
+                connectedUnit.ghost.move(connectedUnit.gridX, connectedUnit.gridY);
+                connectedUnit.ghost.hide()
             } else {
-                for (const terrain of this.terrains) {
-                    if (terrain.intersects(connectedUnit.ghost.x, connectedUnit.ghost.y) && !terrain.canMoveInto(connectedUnit)) {
-                        connectedUnit.ghost.move(connectedUnit.x, connectedUnit.y);
-                        return;
-                    }
+                const terrain = this.terrains[connectedUnit.ghost.gridY][connectedUnit.ghost.gridX];
+                if (!terrain.canMoveInto(connectedUnit)) {
+                    connectedUnit.ghost.move(connectedUnit.gridX, connectedUnit.gridY);
+                    return;
                 }
 
                 connectedUnit.currentOrder = {
-                    movementToX: connectedUnit.ghost.x,
-                    movementToY: connectedUnit.ghost.y,
+                    movementToX: connectedUnit.ghost.gridX,
+                    movementToY: connectedUnit.ghost.gridY,
                     orderType: this.selectedOrderType
                 }
                 console.log(`Unit ${connectedUnit.name} got order`, connectedUnit.currentOrder);
             }
-
-
-
-
-
         });
     }
 
     update() {
         if (this.cursors?.left.isDown) {
-            this.cameras.main.scrollX = Math.max(0, this.cameras.main.scrollX - this.cameraSpeed);
+            this.cameras.main.scrollX = this.cameras.main.scrollX - this.cameraSpeed;
         } else if (this.cursors?.right.isDown) {
-            this.cameras.main.scrollX = Math.min(SMALL_MAP_PIXELSIZE_WIDTH - 800, this.cameras.main.scrollX + this.cameraSpeed);
+            this.cameras.main.scrollX = this.cameras.main.scrollX + this.cameraSpeed;
         }
         if (this.cursors?.up.isDown) {
-            this.cameras.main.scrollY = Math.max(0, this.cameras.main.scrollY - this.cameraSpeed);
+            this.cameras.main.scrollY = this.cameras.main.scrollY - this.cameraSpeed;
         } else if (this.cursors?.down.isDown) {
-            this.cameras.main.scrollY = Math.min(SMALL_MAP_PIXELSIZE_HEIGHT - 600, this.cameras.main.scrollY + this.cameraSpeed);
+            this.cameras.main.scrollY = this.cameras.main.scrollY + this.cameraSpeed;
         }
     }
 }

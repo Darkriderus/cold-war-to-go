@@ -2,7 +2,7 @@
   "units": [
     {
       "name": "MBT BLUE 1",
-      "movementPerTick": 10,
+      "movementPerTick": 3,
       "health": 10,
       "playerId": 0,
       "texture": "tank",
@@ -19,30 +19,7 @@
         "penetrationH": 11,
         "penetrationHe": 11,
         "rateOfFire": 3,
-        "range": 150,
-        "antiInfantry": -1
-      }
-    },
-    {
-      "name": "MBT RED 1",
-      "movementPerTick": 10,
-      "health": 10,
-      "playerId": 1,
-      "texture": "tank",
-      "points": 999,
-      "movement": 11,
-      "movementType": 0,
-
-      "armor": {
-        "front": 10,
-        "side": 5,
-        "hModifier": 2
-      },
-      "gun": {
-        "penetrationH": 11,
-        "penetrationHe": 11,
-        "rateOfFire": 3,
-        "range": 150,
+        "range": 10,
         "antiInfantry": -1
       }
     }

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
-import { Armor, Gun, Layer, Missile, MovementType, Order, PlayerColor, Team, TOKEN_SIZE } from '../helper/constants';
+import { Armor, GRID_SIZE, Gun, Layer, Missile, MovementType, Order, PlayerColor, Team, TOKEN_SIZE } from '../helper/constants';
 import BattlemapScene from '../scenes/BattlemapScene';
+import { coordToGrid, gridToCoord } from '../helper/mapHelper';
 
 type IUnit = {
     points: number
@@ -26,9 +27,17 @@ export class Ghost {
 
     graphics: Phaser.GameObjects.Graphics
 
-    move(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+    get gridX() {
+        return coordToGrid(this.x, this.y).x
+    }
+
+    get gridY() {
+        return coordToGrid(this.x, this.y).y
+    }
+
+    move(gridX: number, gridY: number) {
+        this.x = gridToCoord(gridX, gridY).x;
+        this.y = gridToCoord(gridX, gridY).y;
 
         this.graphics.clear();
         this.redraw()
@@ -48,9 +57,10 @@ export class Ghost {
         this.visible = true
         this.graphics.clear();
 
-        this.graphics.fillStyle(this.connectedUnit.playerColor, 1);
         this.graphics.setDepth(Layer.UI);
-        this.graphics.fillCircle(this.x, this.y, 10);
+        this.graphics.lineStyle(2, this.connectedUnit.playerColor, 1);
+
+        this.graphics.strokeRect(this.x, this.y, GRID_SIZE, GRID_SIZE);
 
     }
 
@@ -91,9 +101,9 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     public moveGraphics: Phaser.GameObjects.Graphics;
     public rangeGraphics: Phaser.GameObjects.Graphics;
 
-    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, unitInfo: IUnit) {
+    constructor(scene: Phaser.Scene, gridX: number, gridY: number, texture: string, unitInfo: IUnit) {
         const colorSuffix = unitInfo.playerId === Team.BLUE ? '_blue' : '_red';
-        super(scene, x, y, texture + colorSuffix);
+        super(scene, gridToCoord(gridX, gridY).x, gridToCoord(gridX, gridY).x, texture + colorSuffix);
         this.hitGraphics = this.scene.add.graphics();
         this.moveGraphics = this.scene.add.graphics();
         this.rangeGraphics = this.scene.add.graphics();
@@ -123,10 +133,23 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
         this.ghost = new Ghost(scene, this, this.center.x, this.center.y);
 
-        this.healthLabel = scene.add.text(x, y + (TOKEN_SIZE), `(${this.health}/${this.maxHealth})`)
+        this.healthLabel = scene.add.text(this.x, this.y + (TOKEN_SIZE), `(${this.health}/${this.maxHealth})`)
             .setFontSize(12)
             .setDepth(Layer.UNITS)
             .setBackgroundColor("grey").setOrigin(0, 0);
+    }
+
+    get movementInAbsolutePerTick() {
+        console.log(this.movementPerTick * GRID_SIZE)
+        return this.movementPerTick * GRID_SIZE
+    }
+
+    get gridX() {
+        return coordToGrid(this.x, this.y).x
+    }
+
+    get gridY() {
+        return coordToGrid(this.x, this.y).y
     }
 
     get center() {
@@ -147,13 +170,12 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     get terrain() {
         const battlemapScene = this.scene.scene.get('BattleMap') as BattlemapScene
-        return battlemapScene.terrains.find(terrain => terrain.intersects(this.x, this.y));
+        return battlemapScene.terrains[this.gridY][this.gridX];
 
     }
 
-    intersects(x: number, y: number) {
-        const myRect = this.getBounds();
-        return Phaser.Geom.Rectangle.Contains(myRect, x, y)
+    intersects(gridX: number, gridY: number) {
+        return this.gridX === gridX && this.gridY === gridY
     }
 
     clearMoveLine() {
@@ -172,10 +194,9 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
     drawRangeCircle(unit: Unit) {
         this.rangeGraphics.clear();
-        this.rangeGraphics.lineStyle(3, 0xFFFFFF, 0.8);
-        this.rangeGraphics.strokeCircle(unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2), unit.range);
+        this.rangeGraphics.lineStyle(3, 0xFF0000, 0.8);
+        this.rangeGraphics.strokeCircle(unit.x, unit.y, unit.range * GRID_SIZE);
     }
-
 
 
     decideTargetToShoot(targetsInRange: { unit: Unit, distance: number }[]) {
@@ -264,11 +285,11 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         visible ? this.ghost.show() : this.ghost.hide();
     }
 
-    move(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-        this.healthLabel.x = x;
-        this.healthLabel.y = y + (TOKEN_SIZE);
+    move(gridX: number, gridY: number) {
+        this.x = gridToCoord(gridX, gridY).x;
+        this.y = gridToCoord(gridX, gridY).y;
+        this.healthLabel.x = this.x;
+        this.healthLabel.y = this.y + (TOKEN_SIZE);
 
         this.redrawMoveLine()
     }
