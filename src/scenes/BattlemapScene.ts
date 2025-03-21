@@ -8,15 +8,12 @@ import { coordToGrid } from "../helper/mapHelper"
 import { BattleMap } from "../objects/battleMap"
 
 // TODO/IDEAS
-// Fullscreen + Camerafix
 // Type Cleanup
-// LOS Check
-// Pathfinding
-// Icons as Class with Rectangle and Icon
+// Deployment Phase
+// Baseline Multiplayer
 // UI reden
-// OOB with FFT-Values
-// OSM Generation?
 // Fog of War
+// Fullscreen + Camerafix
 
 
 class BattlemapScene extends Phaser.Scene {
