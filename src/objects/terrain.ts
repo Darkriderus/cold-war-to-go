@@ -79,6 +79,10 @@ export class Terrain extends Phaser.GameObjects.Rectangle {
         return TERRAIN_INFO[this.terrainType].hitModifier
     }
 
+    blocksLOS() {
+        return TERRAIN_INFO[this.terrainType].blocksLOS
+    }
+
     canMoveInto(_unit: Unit) {
         return TERRAIN_INFO[this.terrainType].moveModifier > 0
     }

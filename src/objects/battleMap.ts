@@ -51,6 +51,52 @@ export class BattleMap {
         }
     }
 
+    checkLOS(startX: number, startY: number, endX: number, endY: number) {
+        // Use Bresenham's Line Algorithm to iterate over the tiles the line crosses
+        let dx = Math.abs(endX - startX);
+        let dy = Math.abs(endY - startY);
+        let sx = startX < endX ? 1 : -1;
+        let sy = startY < endY ? 1 : -1;
+        let err = dx - dy;
+        const grid = this.terrains;
+
+        let x = startX;
+        let y = startY;
+
+        // Flag to ignore the first tile
+        let firstTile = true;
+
+        while (true) {
+            // If we have reached the endpoint, stop
+            if (x === endX && y === endY) {
+                break;
+            }
+
+            // Check if the current tile blocks LOS and it's not the first tile
+            if (!firstTile && grid[y][x].blocksLOS()) {
+                return false;
+            }
+
+            // Set firstTile to false after the first iteration
+            firstTile = false;
+
+            // Bresenham's Line Algorithm step
+            let e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                x += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y += sy;
+            }
+        }
+
+        // If we reach here, all tiles in the line are clear
+        return true;
+    }
+
+
     gridToMovementCost() {
         return mapGrid.map(row => row.map(cell => (this.colorToMovementCost(cell) * 10)));
     }

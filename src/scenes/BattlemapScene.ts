@@ -111,11 +111,20 @@ class BattlemapScene extends Phaser.Scene {
             connectedUnit.ghost.move(grid.x, grid.y);
 
             const terrain = this.map.terrains[grid.y][grid.x];
-            console.log(grid, terrain.terrainType)
+            // console.log(grid, terrain.terrainType)
             if (!terrain.canMoveInto(connectedUnit)) {
                 connectedUnit.ghost.hide()
             } else {
                 connectedUnit.ghost.show();
+            }
+
+            if (this.selectedOrderType === OrderType.ATTACK) {
+                const hasLOS = this.map.checkLOS(connectedUnit.gridX, connectedUnit.gridY, connectedUnit.ghost.gridX, connectedUnit.ghost.gridY)
+                if (!hasLOS) {
+                    connectedUnit.ghost.hide()
+                } else {
+                    connectedUnit.ghost.show();
+                }
             }
 
         });
