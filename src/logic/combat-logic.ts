@@ -91,7 +91,7 @@ export default class CombatLogic {
 
                     let movementPointsLeft = unit.movementPerTick
                     for (const tile of pathToTarget) {
-                        const movementCost = 1 / this.battleMapScene!.terrains[tile.y][tile.x].getMoveModifier(unit);
+                        const movementCost = 1 / this.battleMapScene!.map.terrains[tile.y][tile.x].getMoveModifier(unit);
                         if (movementPointsLeft >= movementCost) {
                             movementPointsLeft -= movementCost;
                             unit.move(tile.x, tile.y);
