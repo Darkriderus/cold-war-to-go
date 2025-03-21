@@ -106,12 +106,12 @@ class BattlemapScene extends Phaser.Scene {
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
         });
         this.input.on('drag', (_pointer: Phaser.Input.Pointer, connectedUnit: Unit, dragX: number, dragY: number) => {
+            if (dragX < 0 || dragY < 0) return
             const grid = coordToGrid(dragX, dragY);
-
             connectedUnit.ghost.move(grid.x, grid.y);
 
+
             const terrain = this.map.terrains[grid.y][grid.x];
-            // console.log(grid, terrain.terrainType)
             if (!terrain.canMoveInto(connectedUnit)) {
                 connectedUnit.ghost.hide()
             } else {
