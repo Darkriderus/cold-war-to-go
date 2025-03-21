@@ -8,12 +8,17 @@ import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
 
 // TODO/IDEAS
-// Move with D&D, Buttons for Targets as if dragged
-// Ghost as Point
-// Icons as Class with Rectangle and Icon
-// OOB with FFT-Values
+// Fullscreen + Camerafix
+// Type Cleanup
+// Tiling der Map + Editor
 // LOS Check
 // Pathfinding
+// Icons as Class with Rectangle and Icon
+// UI reden
+// OOB with FFT-Values
+// OSM Generation?
+// Fog of War
+
 
 const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH * 0.05
@@ -87,14 +92,6 @@ class BattlemapScene extends Phaser.Scene {
                     unit.drawRangeCircle(unit);
                 }
             });
-            unit.ghost.on('pointerdown', () => {
-                this.deselectAll()
-                unit.select()
-                battleUiScene.showUnitInfo(unit);
-
-                this.clearAllRangeCircles()
-                unit.drawRangeCircle(unit);
-            });
             this.combatLogic.units[unitToLoad.playerId].push(unit)
         })
     }
@@ -149,37 +146,32 @@ class BattlemapScene extends Phaser.Scene {
 
         this.input.on('dragstart', (_pointer: Phaser.Input.Pointer, _ghost: Unit) => {
         });
-        this.input.on('drag', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite, dragX: number, dragY: number) => {
-            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);
-            const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
-
+        this.input.on('drag', (_pointer: Phaser.Input.Pointer, connectedUnit: Unit, dragX: number, dragY: number) => {
             const diffX = Math.abs(connectedUnit.x - dragX);
             const diffY = Math.abs(connectedUnit.y - dragY);
 
             if (diffX < TOKEN_SIZE && diffY < TOKEN_SIZE) {
-                connectedUnit.setGhostVisible(false);
-                connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
+                connectedUnit.ghost.move(connectedUnit.x, connectedUnit.y);
+                connectedUnit.ghost.hide();
             } else {
-                connectedUnit.setGhostVisible(true);
-                connectedUnit.moveGhost(dragX, dragY);
+                connectedUnit.ghost.move(dragX, dragY);
+                connectedUnit.ghost.show();
             }
 
             for (const terrain of this.terrains) {
-                if (terrain.intersects(connectedUnit.ghost) && !terrain.canMoveInto(connectedUnit)) {
-                    connectedUnit.ghost.setAlpha(0.2);
+                if (terrain.intersects(connectedUnit.ghost.x, connectedUnit.ghost.y) && !terrain.canMoveInto(connectedUnit)) {
+                    connectedUnit.ghost.hide()
                 }
             }
 
         });
-        this.input.on('dragend', (_pointer: Phaser.Input.Pointer, sprite: Phaser.GameObjects.Sprite) => {
-            const isUnit = this.combatLogic.allUnits.includes(sprite as Unit);
-            const connectedUnit = isUnit ? sprite as Unit : this.combatLogic.allUnits.filter(unit => unit.ghost === sprite)[0]
-
+        this.input.on('dragend', (_pointer: Phaser.Input.Pointer, connectedUnit: Unit) => {
+            console.log(connectedUnit.ghost.visible)
             if (this.selectedOrderType === OrderType.ATTACK) {
                 for (const enemyUnit of this.combatLogic.units[connectedUnit.playerId === Team.BLUE ? Team.RED : Team.BLUE]) {
-                    if (enemyUnit.intersects(connectedUnit.ghost)) {
-                        connectedUnit.moveGhost(enemyUnit.x, enemyUnit.y);
-                        connectedUnit.ghost.setAlpha(0);
+                    if (enemyUnit.intersects(connectedUnit.ghost.x, connectedUnit.ghost.y)) {
+                        connectedUnit.ghost.move(enemyUnit.x, enemyUnit.y);
+                        connectedUnit.ghost.hide()
 
                         connectedUnit.currentOrder = {
                             movementToX: connectedUnit.x,
@@ -190,14 +182,14 @@ class BattlemapScene extends Phaser.Scene {
                         return;
                     }
                 }
-                connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
+                connectedUnit.ghost.move(connectedUnit.x, connectedUnit.y);
 
 
 
             } else {
                 for (const terrain of this.terrains) {
-                    if (terrain.intersects(connectedUnit.ghost) && !terrain.canMoveInto(connectedUnit)) {
-                        connectedUnit.moveGhost(connectedUnit.x, connectedUnit.y);
+                    if (terrain.intersects(connectedUnit.ghost.x, connectedUnit.ghost.y) && !terrain.canMoveInto(connectedUnit)) {
+                        connectedUnit.ghost.move(connectedUnit.x, connectedUnit.y);
                         return;
                     }
                 }

@@ -24,14 +24,12 @@ export default class CombatLogic {
     lockUnits(playerId: Team) {
         this.units[playerId].forEach(unit => {
             unit.disableInteractive()
-            unit.ghost.disableInteractive()
         });
     }
 
     unlockUnits(playerId: Team) {
         this.units[playerId].forEach(unit => {
             unit.setInteractive({ draggable: false });
-            unit.ghost.setInteractive({ draggable: unit.isAlive });
         });
     }
 
@@ -93,7 +91,7 @@ export default class CombatLogic {
                         console.log("   >stop.");
                     }
 
-                    const currentlyOccupiedTerrain = this.battleMapScene!.terrains.find(terrain => terrain.intersects(unit));
+                    const currentlyOccupiedTerrain = this.battleMapScene!.terrains.find(terrain => terrain.intersects(unit.x, unit.y));
                     const terrainModifiedDistance = unit.movementPerTick * (currentlyOccupiedTerrain?.getMoveModifier(unit) || 1);
 
                     if (distanceLeft < terrainModifiedDistance) {

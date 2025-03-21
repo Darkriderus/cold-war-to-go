@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Layer, OrderType, PlayerColor, Team, TOKEN_SIZE } from '../helper/constants';
+import { Armor, Gun, Layer, Missile, MovementType, Order, PlayerColor, Team, TOKEN_SIZE } from '../helper/constants';
 import BattlemapScene from '../scenes/BattlemapScene';
 
 type IUnit = {
@@ -17,44 +17,53 @@ type IUnit = {
     range?: number
 }
 
-type Gun = {
-    penetrationH?: number
-    penetrationHe?: number
-    penetrationAA?: number
-    rateOfFire: number
-    range: number
-    antiInfantry: number
+export class Ghost {
+    scene: Phaser.Scene
+    connectedUnit: Unit
+    x: number
+    y: number
+    visible: boolean = false;
+
+    graphics: Phaser.GameObjects.Graphics
+
+    move(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+
+        this.graphics.clear();
+        this.redraw()
+        this.connectedUnit.redrawMoveLine()
+    }
+
+    redraw() {
+        this.visible ? this.show() : this.hide();
+    }
+
+    hide() {
+        this.visible = false
+        this.graphics.clear();
+    }
+
+    show() {
+        this.visible = true
+        this.graphics.clear();
+
+        this.graphics.fillStyle(this.connectedUnit.playerColor, 1);
+        this.graphics.setDepth(Layer.UI);
+        this.graphics.fillCircle(this.x, this.y, 10);
+
+    }
+
+    constructor(scene: Phaser.Scene, connectedUnit: Unit, x: number, y: number) {
+        this.scene = scene;
+        this.connectedUnit = connectedUnit
+        this.x = x;
+        this.y = y
+        this.graphics = this.scene.add.graphics();
+    }
 }
 
-type Missile = {
-    penetrationH?: number
-    penetrationHe?: number
-    penetrationAA?: number
-    rateOfFire: number
-}
 
-type Armor = {
-    front: number
-    side: number
-    hModifier: number
-}
-
-type Order = {
-    movementToX?: number;
-    movementToY?: number;
-    orderType?: OrderType;
-    targetUnit?: Unit;
-}
-
-enum MovementType {
-    TRACKED,
-    WHEELED,
-    HALFTRACKED,
-    TOWED,
-    HELICOPTER,
-    AIRMOBILE,
-    LEGS
-}
 
 export default class Unit extends Phaser.GameObjects.Sprite {
     public points: number
@@ -75,7 +84,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     public selected: boolean = false;
     public currentOrder: Order | null = null
-    public ghost: Phaser.GameObjects.Sprite;
+    public ghost: Ghost;
     public healthLabel: Phaser.GameObjects.Text;
 
     public hitGraphics: Phaser.GameObjects.Graphics;
@@ -112,13 +121,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             .setInteractive({ draggable: true });
         scene.add.existing(this);
 
-        this.ghost = scene.add.sprite(x, y, this.texture)
-            .setAlpha(0)
-            .setDepth(Layer.GHOSTS)
-            .setInteractive({ draggable: true })
-            .setOrigin(0, 0)
-            .setDisplaySize(TOKEN_SIZE, TOKEN_SIZE);
-
+        this.ghost = new Ghost(scene, this, this.center.x, this.center.y);
 
         this.healthLabel = scene.add.text(x, y + (TOKEN_SIZE), `(${this.health}/${this.maxHealth})`)
             .setFontSize(12)
@@ -128,10 +131,6 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     get center() {
         return { x: this.x + (TOKEN_SIZE / 2), y: this.y + (TOKEN_SIZE / 2) };
-    }
-
-    get ghostCenter() {
-        return { x: this.ghost.x + (TOKEN_SIZE / 2), y: this.ghost.y + (TOKEN_SIZE / 2) };
     }
 
     get playerColor() {
@@ -148,28 +147,13 @@ export default class Unit extends Phaser.GameObjects.Sprite {
 
     get terrain() {
         const battlemapScene = this.scene.scene.get('BattleMap') as BattlemapScene
-        return battlemapScene.terrains.find(terrain => terrain.intersects(this));
+        return battlemapScene.terrains.find(terrain => terrain.intersects(this.x, this.y));
 
     }
 
-    intersects(enemy: Phaser.GameObjects.Sprite) {
-        const enemyRect = enemy.getBounds();
-        const rectPoints = [
-            new Phaser.Geom.Point(enemyRect.x, enemyRect.y), // Top-left
-            new Phaser.Geom.Point(enemyRect.x + enemyRect.width, enemyRect.y), // Top-right
-            new Phaser.Geom.Point(enemyRect.x, enemyRect.y + enemyRect.height), // Bottom-left
-            new Phaser.Geom.Point(enemyRect.x + enemyRect.width, enemyRect.y + enemyRect.height) // Bottom-right
-        ];
-
-        for (const point of rectPoints) {
-            const myRect = this.getBounds();
-
-            if (Phaser.Geom.Rectangle.Contains(myRect, point.x, point.y)) {
-                return true
-            }
-        }
-
-        return false
+    intersects(x: number, y: number) {
+        const myRect = this.getBounds();
+        return Phaser.Geom.Rectangle.Contains(myRect, x, y)
     }
 
     clearMoveLine() {
@@ -180,7 +164,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         if (!this.isAlive) return
         this.moveGraphics.setDepth(Layer.MOVEMENT_LINES);
         this.moveGraphics.lineStyle(2, this.playerColor, 0.6);
-        this.moveGraphics.lineBetween(this.ghostCenter.x, this.ghostCenter.y, this.center.x, this.center.y);
+        this.moveGraphics.lineBetween(this.ghost.x, this.ghost.y, this.center.x, this.center.y);
     }
 
     clearRangeCircles() {
@@ -192,12 +176,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
         this.rangeGraphics.strokeCircle(unit.x + (TOKEN_SIZE / 2), unit.y + (TOKEN_SIZE / 2), unit.range);
     }
 
-    moveGhost(x: number, y: number) {
-        this.ghost.x = x;
-        this.ghost.y = y;
 
-        this.redrawMoveLine()
-    }
 
     decideTargetToShoot(targetsInRange: { unit: Unit, distance: number }[]) {
         // [TODO] Add logic
@@ -227,7 +206,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
             // this.destroy();
             this.moveGraphics.clear();
             this.setTexture("tank_grey")
-            this.ghost.setTexture("tank_grey").setVisible(false)
+            this.ghost.hide()
             this.health = 0
         }
         this.hitEffect()
@@ -282,8 +261,7 @@ export default class Unit extends Phaser.GameObjects.Sprite {
     }
 
     setGhostVisible(visible: boolean) {
-        this.ghost.setAlpha(visible ? 0.6 : 0);
-
+        visible ? this.ghost.show() : this.ghost.hide();
     }
 
     move(x: number, y: number) {

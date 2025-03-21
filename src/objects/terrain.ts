@@ -26,23 +26,8 @@ export class Terrain extends Phaser.Geom.Polygon {
         this.graphics.fillPoints(this.points, true);
     }
 
-    intersects(sprite: Phaser.GameObjects.Sprite) {
-        const spriteRect = sprite.getBounds();
-        const rectPoints = [
-            new Phaser.Geom.Point(spriteRect.x + spriteRect.width / 2, spriteRect.y + spriteRect.height / 2),
-            new Phaser.Geom.Point(spriteRect.x, spriteRect.y), // Top-left
-            new Phaser.Geom.Point(spriteRect.x + spriteRect.width, spriteRect.y), // Top-right
-            new Phaser.Geom.Point(spriteRect.x, spriteRect.y + spriteRect.height), // Bottom-left
-            new Phaser.Geom.Point(spriteRect.x + spriteRect.width, spriteRect.y + spriteRect.height) // Bottom-right
-        ];
-
-        for (const point of rectPoints) {
-            if (Phaser.Geom.Polygon.Contains(this, point.x, point.y)) {
-                return true
-            }
-        }
-
-        return false
+    intersects(x: number, y: number) {
+        return (Phaser.Geom.Polygon.Contains(this, x, y))
     }
 
     get color() {
