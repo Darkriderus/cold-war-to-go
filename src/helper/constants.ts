@@ -18,11 +18,10 @@ export enum Layer {
 }
 
 export enum OrderType {
-    MOVE,
-    RETREAT,
-    ADVANCE,
-    ATTACK,
-    DEFEND
+    FASTMOVE = "fastmove",
+    RETREAT = "retreat",
+    ADVANCE = "advance",
+    ATTACK = "attack",
 }
 
 export enum MoveType {

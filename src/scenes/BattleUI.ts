@@ -2,11 +2,24 @@ import { Layer, OrderType, Team } from "../helper/constants";
 import Unit from "../objects/unit";
 import BattlemapScene from "./BattlemapScene";
 
+type OrderButton = {
+    orderType: OrderType,
+    button: Phaser.GameObjects.Text
+}
 class BattleUI extends Phaser.Scene {
-    readonly SELECTED_TINT = 0x00DD00;
+    readonly SELECTED_TINT = "#00DD00";
+    readonly DESELECTED_TINT = "#DDDDDD";
 
-    moveButton: Phaser.GameObjects.Sprite | undefined;
-    shootButton: Phaser.GameObjects.Sprite | undefined;
+    readonly TURN_INACTIVE_TINT = "#000088";
+    readonly TURN_ACTIVE_TINT = "#333333";
+
+
+    orderButtons: OrderButton[] = []
+    nextTurnButton: Phaser.GameObjects.Text | undefined
+
+
+    // moveButton: Phaser.GameObjects.Text | undefined;
+    // shootButton: Phaser.GameObjects.Sprite | undefined;
 
     teamText: Phaser.GameObjects.Text | undefined;
     nameText: Phaser.GameObjects.Text | undefined;
@@ -16,7 +29,8 @@ class BattleUI extends Phaser.Scene {
     moveButtonSelected: boolean = true;
     shootButtonSelected: boolean = false;
 
-    public selectedOrderType: OrderType = OrderType.MOVE
+    battlemapScene?: BattlemapScene
+
 
     constructor() {
         super({ key: 'BattleUI', active: true });
@@ -63,18 +77,42 @@ class BattleUI extends Phaser.Scene {
         this.load.image('next-turn-icon', 'public/sprites/icons/next-turn.svg');
     }
 
+    deselectAllButtons() {
+        this.orderButtons.forEach(button => {
+            button.button.setActive(false);
+            button.button.setBackgroundColor(this.DESELECTED_TINT);
+        })
+    }
+
+    selectButton(button: OrderButton) {
+        this.deselectAllButtons();
+        button.button.setActive(true);
+        button.button.setBackgroundColor(this.SELECTED_TINT);
+        this.battlemapScene!.selectedOrderType = button.orderType
+    }
+
+    enableNextTurnButton() {
+        this.nextTurnButton!.setBackgroundColor(this.TURN_INACTIVE_TINT);
+        this.nextTurnButton!.setActive(true);
+        this.nextTurnButton!.setAlpha(1);
+        this.nextTurnButton!.setInteractive();
+    }
+
+    disableNextTurnButton() {
+        this.nextTurnButton!.setBackgroundColor(this.TURN_ACTIVE_TINT);
+        this.nextTurnButton!.setActive(false);
+        this.nextTurnButton!.setAlpha(0.5);
+        this.nextTurnButton!.disableInteractive();
+    }
+
     create() {
         const gameWidth = this.game.config.width as number;
         const gameHeight = this.game.config.height as number;
 
-        const battlemapScene = this.scene.get('BattleMap') as BattlemapScene;
+        this.battlemapScene = this.scene.get('BattleMap') as BattlemapScene;
 
-        this.add.rectangle(0, 0, 80, gameHeight, 0x000000)
-            .setAlpha(0.6)
-            .setOrigin(0, 0)
-            .setDepth(Layer.UI);
-        this.add.rectangle(0, gameHeight - 100, gameWidth, 100, 0xFFFFFFF)
-            .setAlpha(0.3)
+        this.add.rectangle(0, gameHeight - 100, gameWidth, 100, 0x333333)
+            .setAlpha(0.5)
             .setOrigin(0, 0)
             .setDepth(Layer.UI);
 
@@ -92,64 +130,57 @@ class BattleUI extends Phaser.Scene {
             .setDepth(Layer.UI);
 
 
+        Object.values(OrderType).forEach((order, idx) => {
+            const x = (gameWidth * 0.4) + (idx * 120);
+            const y = gameHeight - 70
 
-        this.moveButton = this.add.sprite(40, 50, 'move-icon')
+            const button = {
+                orderType: order as OrderType,
+                button: this.add.text(x, y, order.toUpperCase(), {
+                    stroke: "#000000",
+                    strokeThickness: 4,
+                    backgroundColor: this.DESELECTED_TINT,
+                    color: "white",
+                    padding: { left: 10, right: 10, top: 5, bottom: 5 },
+                })
+                    .setDepth(Layer.UI)
+                    .setInteractive()
+                    .on('pointerover', () => {
+                    })
+                    .on('pointerout', () => {
+                    })
+                    .on('pointerdown', () => {
+                        this.deselectAllButtons()
+                        this.selectButton(button)
+                        console.log(this.battlemapScene!.selectedOrderType)
+                    })
+            }
+            this.orderButtons.push(button)
+        })
+
+        this.nextTurnButton = this.add.text((gameWidth - 150), gameHeight - 70, "Next Turn", {
+            stroke: "#000000",
+            strokeThickness: 4,
+            backgroundColor: this.TURN_INACTIVE_TINT,
+            color: "white",
+            padding: { left: 10, right: 10, top: 5, bottom: 5 },
+        })
             .setDepth(Layer.UI)
-            .setDisplaySize(50, 50)
             .setInteractive()
             .on('pointerover', () => {
             })
             .on('pointerout', () => {
+                this.nextTurnButton!.clearTint();
             })
             .on('pointerdown', () => {
-                this.moveButtonSelected = true
-                this.shootButtonSelected = false
-
-                this.selectedOrderType = OrderType.MOVE
-
-                this.moveButton?.setTint(this.SELECTED_TINT);
-                this.shootButton?.clearTint();
-            })
-        if (this.moveButtonSelected) {
-            this.moveButton?.setTint(this.SELECTED_TINT);
-        }
-
-        this.shootButton = this.add.sprite(40, 150, 'shoot-icon')
-            .setDepth(Layer.UI)
-            .setDisplaySize(50, 50)
-            .setInteractive()
-            .on('pointerover', () => {
-            })
-            .on('pointerout', () => {
-            })
-            .on('pointerdown', () => {
-                this.moveButtonSelected = false
-                this.shootButtonSelected = true
-
-                this.selectedOrderType = OrderType.ATTACK
-
-                this.shootButton?.setTint(this.SELECTED_TINT);
-                this.moveButton?.clearTint();
-            })
-        if (this.shootButtonSelected) {
-            this.shootButton.setTint(this.SELECTED_TINT);
-        }
-
-        let nextTurnButton = this.add.sprite(40, gameHeight - 50, 'next-turn-icon')
-            .setDepth(Layer.UI)
-            .setDisplaySize(50, 50)
-            .setInteractive()
-            .on('pointerover', () => {
-            })
-            .on('pointerout', () => {
-                nextTurnButton.clearTint();
-            })
-            .on('pointerdown', () => {
-                battlemapScene.deselectAll();
-                battlemapScene.clearAllRangeCircles();
-                battlemapScene.combatLogic.acceptOrders()
+                this.battlemapScene!.deselectAll();
+                this.battlemapScene!.clearAllRangeCircles();
+                this.nextTurnButton!.setBackgroundColor(this.TURN_ACTIVE_TINT);
+                this.disableNextTurnButton()
+                this.battlemapScene!.combatLogic.acceptOrders()
             })
 
+        this.selectButton(this.orderButtons.find(btn => (btn.orderType) == (this.battlemapScene!.selectedOrderType))!)
     }
 }
 

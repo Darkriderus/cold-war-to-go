@@ -1,15 +1,19 @@
 import { TICK_INTERVAL, Team, TICK_PER_ROUND } from "../helper/constants";
 import Unit from "../objects/unit";
 import BattlemapScene from "../scenes/BattlemapScene";
+import BattleUI from "../scenes/BattleUI";
 
 export default class CombatLogic {
     public units: Unit[][] = []
     private battleMapScene?: BattlemapScene
+    private battleUI?: BattleUI
 
-    initialize(battleMapScene: BattlemapScene): void {
+    initialize(battleMapScene: BattlemapScene, battleUI: BattleUI): void {
         this.units[Team.BLUE] = []
         this.units[Team.RED] = []
         this.battleMapScene = battleMapScene
+        this.battleUI = battleUI
+
     }
 
     get allUnits(): Unit[] {
@@ -42,6 +46,8 @@ export default class CombatLogic {
         this.unlockUnits(Team.BLUE)
         this.unlockUnits(Team.RED)
 
+
+
         console.log("-- Round Done! --")
     }
 
@@ -54,6 +60,7 @@ export default class CombatLogic {
                     this.handleTick(tick);
                     tick += 1
                     if (tick >= TICK_PER_ROUND) {
+                        this.battleUI!.enableNextTurnButton();
                         resolve(true)
                     }
                 },

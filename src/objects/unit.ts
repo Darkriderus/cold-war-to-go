@@ -42,7 +42,7 @@ type Armor = {
 type Order = {
     movementToX?: number;
     movementToY?: number;
-    movementType?: OrderType;
+    orderType?: OrderType;
     targetUnit?: Unit;
 }
 

@@ -1,4 +1,4 @@
-import { PlayerColor, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team, TOKEN_SIZE } from "../helper/constants"
+import { OrderType, PlayerColor, SMALL_MAP_PIXELSIZE_HEIGHT, SMALL_MAP_PIXELSIZE_WIDTH, Team, TOKEN_SIZE } from "../helper/constants"
 import Unit from "../objects/unit"
 // import unitList from "../../public/dummy/dummy_oob.json"
 import unitList from "../../public/dummy/dummy_oob_v2.json"
@@ -8,9 +8,12 @@ import BattleUI from "./BattleUI"
 import { Terrain } from "../objects/terrain"
 
 // TODO/IDEAS
-// Icons as Class with Rectangle and Icon
 // Move with D&D, Buttons for Targets as if dragged
+// Ghost as Point
+// Icons as Class with Rectangle and Icon
 // OOB with FFT-Values
+// LOS Check
+// Pathfinding
 
 const DBG_GAP_BETWEEN_UNITS = 50
 const DBG_OFFSET = SMALL_MAP_PIXELSIZE_WIDTH * 0.05
@@ -24,16 +27,18 @@ class BattlemapScene extends Phaser.Scene {
     private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
     private cameraSpeed: number = 10;
 
+    public selectedOrderType: OrderType = OrderType.FASTMOVE
+
     // ToDo - Move to config
     public mapConfig = mapList.maps[0]
+
+
 
     constructor() {
         console.log("-- Battlemap Initializing.. --")
 
         super({ key: 'BattleMap', active: true });
         this.combatLogic = new CombatLogic();
-        this.combatLogic.initialize(this);
-
         console.log("-- ..Done! --")
     }
 
@@ -73,12 +78,14 @@ class BattlemapScene extends Phaser.Scene {
 
             const unit = new Unit(this, (leftEdge + (idx * DBG_GAP_BETWEEN_UNITS)), topEdge, unitToLoad.texture, unitToLoad);
             unit.on('pointerdown', () => {
-                this.deselectAll()
-                unit.select()
-                battleUiScene.showUnitInfo(unit);
+                if (!unit.selected) {
+                    this.deselectAll()
+                    unit.select()
+                    battleUiScene.showUnitInfo(unit);
 
-                this.clearAllRangeCircles()
-                unit.drawRangeCircle(unit);
+                    this.clearAllRangeCircles()
+                    unit.drawRangeCircle(unit);
+                }
             });
             unit.ghost.on('pointerdown', () => {
                 this.deselectAll()
@@ -110,6 +117,8 @@ class BattlemapScene extends Phaser.Scene {
 
     create() {
         const battleUiScene = this.scene.get('BattleUI') as BattleUI;
+        this.combatLogic.initialize(this, battleUiScene);
+
         this.input.on('wheel', (_pointer: any, _gameObjects: any, _deltaX: number, deltaY: number, _deltaZ: number) => {
             this.cameras.main.zoom += deltaY * -0.001;
             this.cameras.main.zoom = Phaser.Math.Clamp(this.cameras.main.zoom, 0.5, 2);
@@ -127,8 +136,7 @@ class BattlemapScene extends Phaser.Scene {
 
         this.deployUnits(Team.BLUE);
         this.deployUnits(Team.RED);
-        let points: number[] = []
-        this.input.on('pointerdown', (pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
+        this.input.on('pointerdown', (_pointer: Phaser.Input.Pointer, gameObjects: Phaser.GameObjects.GameObject[]) => {
             if (gameObjects.length === 0) {
                 this.deselectAll()
                 battleUiScene.showUnitInfo();
@@ -174,10 +182,12 @@ class BattlemapScene extends Phaser.Scene {
                 }
             }
 
-            if (!connectedUnit.currentOrder) connectedUnit.currentOrder = {};
-            connectedUnit.currentOrder.movementToX = connectedUnit.ghost.x;
-            connectedUnit.currentOrder.movementToY = connectedUnit.ghost.y;
-            connectedUnit.currentOrder.movementType = battleUiScene.selectedOrderType;
+            connectedUnit.currentOrder = {
+                movementToX: connectedUnit.ghost.x,
+                movementToY: connectedUnit.ghost.y,
+                orderType: this.selectedOrderType
+            }
+            console.log(`Unit ${connectedUnit.name} got order`, connectedUnit.currentOrder);
 
         });
     }
