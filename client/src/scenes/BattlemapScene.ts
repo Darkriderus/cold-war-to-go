@@ -1,6 +1,5 @@
 import { OrderType, Team } from "../helper/constants"
 import Unit from "../objects/unit"
-// import unitList from "../../public/dummy/dummy_oob.json"
 import unitList from "../../public/dummy/dummy_oob_v2.json"
 import CombatLogic from "../logic/combat-logic"
 import BattleUI from "./BattleUI"

@@ -1,8 +1,9 @@
 import Phaser from 'phaser'
+import MapGenScene from './scenes/MapGenScene';
+import BattlemapScene from './scenes/BattlemapScene';
+import BattleUI from './scenes/BattleUI';
+import ServerConnectionScene from './scenes/ServerConnectionScene';
 
-import BattlemapScene from './scenes/BattlemapScene'
-import BattleUI from './scenes/BattleUI'
-import MapGenScene from './scenes/MapGenScene'
 
 function getUrlParam(param: string): string | null {
 	const urlParams = new URLSearchParams(window.location.search);
@@ -29,7 +30,8 @@ const config: Phaser.Types.Core.GameConfig = {
 			},
 		},
 	},
-	scene: [mapGen ? MapGenScene : BattlemapScene, BattleUI],
+	scene: [ServerConnectionScene]
+	// scene: [mapGen ? MapGenScene : BattlemapScene, BattleUI],
 }
 
 export default new Phaser.Game(config)
